@@ -1,0 +1,30 @@
+\documentclass{article}
+
+\usepackage[swedish]{babel}
+
+\usepackage[utf8x]{inputenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+
+\title{Blockkedjeimplementation av röstningssystem hos bostadsrätter}
+\author{David Holst \& Shad Mahmod}
+
+\begin{document}
+\maketitle
+\section{Bakgrund och projektbeskrivning}
+Ett problem i många bostadsrättsföreningar är en bristande vilja att engagera sig som kommer ifrån ett system som i många fall är ineffektivt och utdaterat. Idag kan medlemmar i föreningen lägga fram förslag som, efter att styrelsen sett över det, tas upp för röstning på en föreningsstämma. Där räknas röstningsresultatet ut baserat på hushållens andelstal i föreningen. Ett alternativ till detta skulle kunna vara att förslag och röstningsprocessen sker helt och hållet på en webapplikation där röstningen sköts med hjälp av blockkedjeteknologi. Denna webbapplikation skulle kunna effektivisera och förenkla och förenkla röstningsprocessen och förhoppningsvis öka deltagandet genom att minska det administrativa arbetet för dem som engagerar sig i bostadsrättsföreningen. Fördelen med att använda blockkedjeteknologi är att man garanterar röstningens integritet då varje röstare måste signera sin röst med sin privata nyckel. 
+\\ \\
+Projektet innefattar att göra ett Proof of Concept för ett sådant system där blockkedjor används för att verifiera röstningen. Detta görs genom att definiera och skriva de "smarta kontrakt" som utgör systemet. Vidare ska en enkel webapplikation tas fram och kopplas ihop med blockkedjeverktyget. 
+
+\section{Tidsplan}
+\textit{Vecka 1-2}: Inläsning på hur blockkedjeteknologin fungerar; Lär känna de verktyg som kommer användas under projektet; Bli bekväma med att skriva enklare "smarta kontrakt", deploya dem på testnätet och testa funktionalitet. \\
+\textit{Vecka 3}: Ta fram en övergripande skiss på systemets arkitektur. \\
+\textit{Vecka 4-7}: Implementation av systemet. \\
+\textit{Vecka 8-10}: Utformning och implementation av grafiskt gränssnitt (webapplikation) samt rapportskrivning.
+
+\section{Projektmål}
+Syftet med projektet är att ta fram ett Proof of Concept för att visa på att det är möjligt att sköta röstningen för en bostadsrättsförening mha blockkedjor med förhoppningen att det kan förenkla för de som engagerar sig.
+
+\end{document}
