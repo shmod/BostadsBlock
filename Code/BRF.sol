@@ -8,8 +8,6 @@ pragma solidity ^0.4.19;
 	How to retrieve the winning proposal in BRF.
 
 	How does the has look like (format, size etc.)?
-
-
 */
 
 import "./Ballot.sol";
@@ -77,7 +75,9 @@ contract BRF {
 	}
 
 	/* 
-
+	@dev Votes for a proposal in a given ballot
+	@param ballotID The id of the ballot we are voting on
+	@param proposalID The id of the proposal we are voting on
 	*/
 	function vote(uint ballotID, uint proposalID) public {
 		ballots[ballotID].vote(proposalID, memberWeights[msg.sender], msg.sender);

@@ -1,7 +1,5 @@
 pragma solidity ^0.4.19;
 
-
-
 /**
  * The Ballot contract does this and that...
  */
