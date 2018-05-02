@@ -24,7 +24,7 @@ contract Ballot {
 
 	Proposal[] public proposals;
 
-	function Ballot (address[] adds, bytes32[] proposalNames, uint duration) {
+	constructor (address[] adds, bytes32[] proposalNames, uint duration) public {
 		addressBRF = msg.sender;
 		durationTime = duration;
 		startTime = now; 
@@ -32,7 +32,7 @@ contract Ballot {
 			voteRights[adds[i]] = -1;
 		}
 
-		for (uint i = 0; i < proposalNames.length; i++) {
+		for (i = 0; i < proposalNames.length; i++) {
 			proposals.push(Proposal({
 				name: proposalNames[i],
 				voteCount: 0
@@ -47,11 +47,11 @@ contract Ballot {
 	@param proposalID id of proposal you want to vote for
 	@param weight Weight of your vote.
 	*/
- 	function vote (uint proposalID, uint weight, address voterAddress) onlyBRF {
+ 	function vote (uint proposalID, uint weight, address voterAddress) public onlyBRF {
  		require(voteRights[voterAddress] != 0, "You dont have the right to vote");
  		require(now < startTime + durationTime, "Ballot is not live anymore");
  		if (voteRights[voterAddress] > 0) {
- 			proposals[proposalID].voteCount += weight + voteRights[voterAddress];
+ 			proposals[proposalID].voteCount += weight + uint(voteRights[voterAddress]);
  		} else {
  			proposals[proposalID].voteCount += weight;
  		}
@@ -65,18 +65,18 @@ contract Ballot {
  	@param weight of the delegator
  	@param address of the delegatee
  	*/
- 	function delegate (uint weight, address to, address from) onlyBRF{
+ 	function delegate (uint weight, address to, address from) public onlyBRF{
  		require(voteRights[from] == -1, "You are not allowed to delegate");
  		require(voteRights[to] == -1, "The delegatee is not eligable for a delegation");
  		require(to != from, "You cannot delegate to yourself");
- 		voteRights[to] = weight;
+ 		voteRights[to] = int(weight);
  		voteRights[from] = 0;
  	}
  	
  	/* @dev Computes the winning proposal by counting all previous votes. */
- 	function winningProposalID () private returns(uint proposalID_) {
+ 	function winningProposalID () private view returns(uint proposalID_) {
  		//require(now > durationTime + startTime, "Ballot has not ended");
- 		int winningVoteCount = 0;
+ 		uint winningVoteCount = 0;
         for (uint p = 0; p < proposals.length-1; p++) {
             if (proposals[p].voteCount > winningVoteCount) {
                 winningVoteCount = proposals[p].voteCount;
