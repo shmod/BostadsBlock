@@ -22,23 +22,36 @@ contract BRF {
 	address public chairPerson;
 	uint public sumWeights;
 
-	Ballot[] ballots;
+	Ballot[] public ballots;
+	uint public ballotStatus;
+
+    // voted event
+    event votedEvent (
+        uint indexed _candidateId
+    );
+
+
 
 	constructor () public{
+		ballotStatus = 0;
 		chairPerson = msg.sender;
-		weights = [25, 5, 2, 35, 15];
-		addresses = [0xca35b7d915458ef540ade6068dfe2f44e8fa733c, 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c, 0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db, 0x583031d1113ad414f02576bd6afabfb302140225, 0xdd870fa1b7c4700f2bd7f44238821c26f7392148];
 		sumWeights = 0;
-		for (uint i = 0; i<weights.length; i++) {
-			giveRightToVote(weights[i], addresses[i]);
-		}
+		// weights = [25, 5, 2, 35, 15];
+		// addresses = [0xca35b7d915458ef540ade6068dfe2f44e8fa733c, 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c, 0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db, 0x583031d1113ad414f02576bd6afabfb302140225, 0xdd870fa1b7c4700f2bd7f44238821c26f7392148];
+		// for (uint i = 0; i<weights.length; i++) {
+		// 	giveRightToVote(weights[i], addresses[i]);
+		// }
+		// int[] storage input;
+		// input.push(1);
+		// input.push(2);
+		// createBallot(input);
 	}
 
 
 	/* This function gets passed tuples of weights and addresses. Only the chairperson
 	will be allowed to call this function. The function assigns a weight to a certain address.
 	When a call is made later, the address will be able to vote with its shares. */
-	function giveRightToVote(uint weight, address currAdd) internal {
+	function giveRightToVote(uint weight, address currAdd) public {
 
 		require (weight > 0, "Cannot assign nonpositive values to our weights");
 		require (msg.sender == chairPerson, "You do not have permission to add a member");
@@ -49,6 +62,8 @@ contract BRF {
 
 		memberWeights[currAdd] = weight;
 		sumWeights += weight;
+		addresses.push(currAdd);
+		weights.push(weight);
 	}
 
 
@@ -69,9 +84,10 @@ contract BRF {
 	/* @dev Creates a new ballot and pushes it into the global array called ballots.
 	@param proposalNames array with proposalnames 
 	*/
-	function createBallot(bytes32[] proposalNames) public {
+	function createBallot(int[] proposalNames) public {
 		require(msg.sender == chairPerson, "You cant create a ballot");
-		ballots.push(new Ballot(addresses, proposalNames, 120));
+		ballotStatus = 1;
+		ballots.push(new Ballot(addresses, proposalNames));
 	}
 
 	/* 
@@ -96,8 +112,25 @@ contract BRF {
 	associated with the winning proposal.
 	@param ballotID The id of the associated
 	*/
-	function getWinner(uint ballotID) public view returns (bytes32 winnerName_){
+	function getWinner(uint ballotID) public view returns (int winnerName_){
 		winnerName_ = ballots[ballotID].winnerName();
 	}
+
+	/* test help functions */
+
+	/* Returns the number of ballots */
+	function getBallotSizes() constant public returns (uint numOfBallots_) {
+		if (ballotStatus == 1) {
+			numOfBallots_ =  ballots.length;
+		} else {
+			numOfBallots_ = 0;
+		}
+	}
+
+	function getNumOfAddresses() constant public returns (uint numAdd) {
+		numAdd = addresses.length;
+	}
+
+
 }
 

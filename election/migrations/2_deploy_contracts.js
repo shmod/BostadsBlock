@@ -1,4 +1,4 @@
-var BRF = artifacts.require("./Election.sol");
+var BRF = artifacts.require("./BRF.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(BRF);

@@ -15,17 +15,18 @@ contract Ballot {
 	}
 
 	struct Proposal {
-		bytes32 name;
+		int name;
 		uint voteCount;
 		//hash = "qe23rs!"
 	}
 
 	Proposal[] public proposals;
 
-	constructor (address[] adds, bytes32[] proposalNames, uint duration) public {
+	/* Removed duration as input */
+	constructor (address[] adds, int[] proposalNames) public {
 		addressBRF = msg.sender;
-		durationTime = duration;
-		startTime = now; 
+		//durationTime = duration;
+		//startTime = now; 
 		for (uint i = 0; i < adds.length; i++) {
 			voteRights[adds[i]] = -1;
 		}
@@ -47,7 +48,7 @@ contract Ballot {
 	*/
  	function vote (uint proposalID, uint weight, address voterAddress) public onlyBRF {
  		require(voteRights[voterAddress] != 0, "You dont have the right to vote");
- 		require(now < startTime + durationTime, "Ballot is not live anymore");
+ 		//require(now < startTime + durationTime, "Ballot is not live anymore");
  		if (voteRights[voterAddress] > 0) {
  			proposals[proposalID].voteCount += weight + uint(voteRights[voterAddress]);
  		} else {
@@ -88,9 +89,9 @@ contract Ballot {
  	the proposal involves a payment then the corresponding transaction to the winner will be
  	executed. */ 		
 	function winnerName() public view
-            returns (bytes32 winnerName_)
+            returns (int winnerName_)
     {
-    	require(now - startTime > durationTime, "Vote not yet ended.");
+    	//require(now - startTime > durationTime, "Vote not yet ended.");
         winnerName_ = proposals[winningProposalID()].name;
     }
 
