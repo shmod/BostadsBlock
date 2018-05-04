@@ -88,8 +88,8 @@ App = {
         var candidatesResults = $("#candidatesResults");
         candidatesResults.empty();
 
-        var candidatesSelect = $('#candidatesSelect');
-        candidatesSelect.empty();
+        var ballotSelect = $('#ballotSelect');
+        ballotSelect.empty();
 
         ballotSize = ballSize;
         // Render candidate Result
@@ -98,7 +98,7 @@ App = {
         console.log("Hello!");
         // Render candidate ballot option
         var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-        candidatesSelect.append(candidateOption);
+        ballotSelect.append(candidateOption);
         return brfInstance.name();
       }).then(function(brfname2) {
         var BRFname = $("#BRFname");
@@ -119,8 +119,17 @@ App = {
     content.show();
   },
 
+  addBallot: function() {
+    var ballotName = document.getElementById("ballotForm").value;
+    var candidatesResults = $("#candidatesResults");
+    App.contracts.BRF.deployed().then(function(instance) { 
+      return instance.createBallot([1,2]);
+    });
+  },
+
+
   castVote: function() {
-    var candidateId = $('#candidatesSelect').val();
+    var candidateId = $('#ballotSelect').val();
     App.contracts.Election.deployed().then(function(instance) {
       return instance.vote(candidateId, { from: App.account });
     }).then(function(result) {

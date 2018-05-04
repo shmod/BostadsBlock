@@ -37,18 +37,21 @@
               </tbody>
             </table>
             <hr/>
-            <form>
-              Fråga <br>
+            <form id="ballotForm" target="_blank" onSubmit="App.addBallot(); return false;">
+              Nytt förslag: <br>
               <input type="text" ballotName="FirstProposal"><br>
-              Förslag <br>
+              Förslag: <br>
               <input type="text" proposalName="FirstProposal"><br>
+              Förslag: <br>
+              <input type="text" proposalName="FirstProposal"><br>
+              <button type:"submit class="btn btn-primary">Add Ballot</button> <br>
 
             </form>
 
             <form onSubmit="App.castVote(); return false;">
               <div class="form-group">
-                <label for="candidatesSelect">Select Proposal</label>
-                <select class="form-control" id="candidatesSelect">
+                <label for="ballotSelect">Select Proposal</label>
+                <select class="form-control" id="ballotSelect">
                 </select>
               </div>
               <button type="submit" class="btn btn-primary">Vote</button>
