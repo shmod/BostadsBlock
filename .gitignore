@@ -1,1 +1,5 @@
 .DS_Store
+/build/contracts/Ballot.json
+/build/contracts/BRF.json
+/build/contracts/Migrations.json
+/build/contracts/Election.json
