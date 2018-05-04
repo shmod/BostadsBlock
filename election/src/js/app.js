@@ -120,10 +120,10 @@ App = {
   },
 
   addBallot: function() {
-    var ballotName = document.getElementById("ballotForm").value;
-    var candidatesResults = $("#candidatesResults");
+    var ballotName = document.getElementById("bn").value;
+    console.log(ballotName)
     App.contracts.BRF.deployed().then(function(instance) { 
-      return instance.createBallot([1,2]);
+      return instance.createBallot("adslfg", [1,2]);
     });
   },
 

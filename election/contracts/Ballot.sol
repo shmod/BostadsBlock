@@ -8,6 +8,7 @@ contract Ballot {
 	uint durationTime;
 	address addressBRF;
 	mapping (address => int) voteRights;
+	string public name;
 
 	modifier onlyBRF {
 		require(msg.sender == addressBRF, "Only creating BRF can call this function");
@@ -23,7 +24,8 @@ contract Ballot {
 	Proposal[] public proposals;
 
 	/* Removed duration as input */
-	constructor (address[] adds, int[] proposalNames) public {
+	constructor (string _name, address[] adds, int[] proposalNames) public {
+		name = _name; 
 		addressBRF = msg.sender;
 		//durationTime = duration;
 		//startTime = now; 

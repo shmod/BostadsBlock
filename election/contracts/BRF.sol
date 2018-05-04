@@ -86,10 +86,10 @@ contract BRF {
 	/* @dev Creates a new ballot and pushes it into the global array called ballots.
 	@param proposalNames array with proposalnames 
 	*/
-	function createBallot(int[] proposalNames) public {
+	function createBallot(string name, int[] proposalNames) public {
 		require(msg.sender == chairPerson, "You cant create a ballot");
 		ballotStatus = 1;
-		ballots.push(new Ballot(addresses, proposalNames));
+		ballots.push(new Ballot(name, addresses, proposalNames));
 	}
 
 	/* 
@@ -133,6 +133,13 @@ contract BRF {
 		numAdd = addresses.length;
 	}
 
-
+	function getBallotName(uint ballotID) view public returns (string name_){
+		name_ = ballots[ballotID].name();
+	}
+	
 }
+
+
+
+
 
