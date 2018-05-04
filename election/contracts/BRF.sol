@@ -21,6 +21,7 @@ contract BRF {
 	uint[] private weights;
 	address public chairPerson;
 	uint public sumWeights;
+	bytes32 public name;
 
 	Ballot[] public ballots;
 	uint public ballotStatus;
