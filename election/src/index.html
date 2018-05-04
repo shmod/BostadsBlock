@@ -24,9 +24,6 @@
           <h1 class="text-center" id="BRFname">BRF Results</h1>
           <hr/>
           <br/>
-          <div id="loader">
-            <p class="text-center">Loading...</p>
-          </div>
           <div id="content" style="display: none;">
             <table class="table">
               <thead>
@@ -40,6 +37,14 @@
               </tbody>
             </table>
             <hr/>
+            <form>
+              Fråga <br>
+              <input type="text" ballotName="FirstProposal"><br>
+              Förslag <br>
+              <input type="text" proposalName="FirstProposal"><br>
+
+            </form>
+
             <form onSubmit="App.castVote(); return false;">
               <div class="form-group">
                 <label for="candidatesSelect">Select Proposal</label>
