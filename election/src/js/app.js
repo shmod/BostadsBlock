@@ -23,11 +23,11 @@ App = {
   },
 
   initContract: function() {
-    $.getJSON("Election.json", function(election) {
+    $.getJSON("BRF.json", function(brf) {
       // Instantiate a new truffle contract from the artifact
-      App.contracts.Election = TruffleContract(election);
+      App.contracts.BRF = TruffleContract(brf);
       // Connect provider to interact with contract
-      App.contracts.Election.setProvider(App.web3Provider);
+      App.contracts.BRF.setProvider(App.web3Provider);
 
       App.listenForEvents();
 
@@ -37,29 +37,28 @@ App = {
 
   // Listen for events emitted from the contract
   listenForEvents: function() {
-    App.contracts.Election.deployed().then(function(instance) {
+    App.contracts.BRF.deployed().then(function(instance) {
       // Restart Chrome if you are unable to receive this event
       // This is a known issue with Metamask
       // https://github.com/MetaMask/metamask-extension/issues/2393
-      instance.votedEvent({}, {
-        fromBlock: 0,
-        toBlock: 'latest'
-      }).watch(function(error, event) {
-        console.log("event triggered", event)
+      // instance.votedEvent({}, {
+      //   fromBlock: 0,
+      //   toBlock: 'latest'
+      // }).watch(function(error, event) {
+      //   console.log("event triggered", event)
         // Reload when a new vote is recorded
         App.render();
-      });
+      // });
     });
   },
 
   render: function() {
-    var electionInstance;
+    var brfInstance;
     var loader = $("#loader");
     var content = $("#content");
 
     loader.show();
     content.hide();
-
     // Load account data
     web3.eth.getCoinbase(function(err, account) {
       if (err === null) {
@@ -67,44 +66,52 @@ App = {
         $("#accountAddress").html("Your Account: " + account);
       }
     });
-
+    var id;
+    var name;
+    var ballotSize;
     // Load contract data
-    App.contracts.Election.deployed().then(function(instance) {
-      electionInstance = instance;
-      return electionInstance.candidatesCount();
-    }).then(function(candidatesCount) {
-      var candidatesResults = $("#candidatesResults");
-      candidatesResults.empty();
+    App.contracts.BRF.deployed().then(function(instance) {
+      brfInstance = instance;
+      return brfInstance.getNumOfAddresses();
+    }).then(function(numAdd) {
+        id = numAdd;
+        // for (var i = 1; i <= candidatesCount; i++) {
+        // electionInstance..then(function(candidate) {
+        //   var id = candidate[0];
+        //   var name = candidate[1];
+        //   var voteCount = candidate[2];
+        return brfInstance.chairPerson();
+      }).then(function(nameCP) {
+        name = nameCP;
+        return brfInstance.getBallotSizes();
+      }).then(function(ballSize) {
+        var candidatesResults = $("#candidatesResults");
+        candidatesResults.empty();
 
-      var candidatesSelect = $('#candidatesSelect');
-      candidatesSelect.empty();
+        var candidatesSelect = $('#candidatesSelect');
+        candidatesSelect.empty();
 
-      for (var i = 1; i <= candidatesCount; i++) {
-        electionInstance.candidates(i).then(function(candidate) {
-          var id = candidate[0];
-          var name = candidate[1];
-          var voteCount = candidate[2];
-
-          // Render candidate Result
-          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
-          candidatesResults.append(candidateTemplate);
-          console.log("Hello!");
-          // Render candidate ballot option
-          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-          candidatesSelect.append(candidateOption);
-        });
-      }
-      return electionInstance.voters(App.account);
-    }).then(function(hasVoted) {
-      // Do not allow a user to vote
-      if(hasVoted) {
-        $('form').hide();
-      }
-      loader.hide();
-      content.show();
-    }).catch(function(error) {
-      console.warn(error);
-    });
+        ballotSize = ballSize;
+        // Render candidate Result
+        var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + ballotSize + "</td></tr>"
+        candidatesResults.append(candidateTemplate);
+        console.log("Hello!");
+        // Render candidate ballot option
+        var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
+        candidatesSelect.append(candidateOption);
+      });
+    //   return electionInstance.voters(App.account);
+    // }).then(function(hasVoted) {
+    //   // Do not allow a user to vote
+    //   if(hasVoted) {
+    //     $('form').hide();
+    //   }
+    //   loader.hide();
+    //   content.show();
+    // }).catch(function(error) {
+    //   console.warn(error);
+    // });
+    content.show();
   },
 
   castVote: function() {
