@@ -54,10 +54,10 @@ App = {
 
   render: function() {
     var brfInstance;
-    var loader = $("#loader");
+    //var loader = $("#loader");
     var content = $("#content");
 
-    loader.show();
+    //loader.show();
     content.hide();
     // Load account data
     web3.eth.getCoinbase(function(err, account) {
@@ -99,6 +99,11 @@ App = {
         // Render candidate ballot option
         var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
         candidatesSelect.append(candidateOption);
+        return brfInstance.name();
+      }).then(function(brfname2) {
+        var BRFname = $("#BRFname");
+        BRFname.empty();
+        BRFname.append(brfname2);
       });
     //   return electionInstance.voters(App.account);
     // }).then(function(hasVoted) {
@@ -106,7 +111,7 @@ App = {
     //   if(hasVoted) {
     //     $('form').hide();
     //   }
-    //   loader.hide();
+    //  loader.hide();
     //   content.show();
     // }).catch(function(error) {
     //   console.warn(error);
@@ -121,7 +126,7 @@ App = {
     }).then(function(result) {
       // Wait for votes to update
       $("#content").hide();
-      $("#loader").show();
+      //$("#loader").show();
     }).catch(function(err) {
       console.error(err);
     });
