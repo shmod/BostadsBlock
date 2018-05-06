@@ -86,10 +86,10 @@ contract BRF {
 	/* @dev Creates a new ballot and pushes it into the global array called ballots.
 	@param proposalNames array with proposalnames 
 	*/
-	function createBallot(string name, int[] proposalNames) public {
+	function createBallot(string _ballotName, int[] proposalNames) public {
 		require(msg.sender == chairPerson, "You cant create a ballot");
 		ballotStatus = 1;
-		ballots.push(new Ballot(name, addresses, proposalNames));
+		ballots.push(new Ballot(_ballotName, addresses, proposalNames));
 	}
 
 	/* 
@@ -120,21 +120,32 @@ contract BRF {
 
 	/* test help functions */
 
-	/* Returns the number of ballots */
-	function getBallotSizes() constant public returns (uint numOfBallots_) {
+	/* @dev Returns the number of ballots 
+	@returns numBallotsNumber of ballots created
+	*/
+	function getNumBallots() constant public returns (uint numBallots_) {
 		if (ballotStatus == 1) {
-			numOfBallots_ =  ballots.length;
+			numBallots_ =  ballots.length;
 		} else {
-			numOfBallots_ = 0;
+			numBallots_ = 0;
 		}
 	}
 
-	function getNumOfAddresses() constant public returns (uint numAdd) {
-		numAdd = addresses.length;
+
+	/* @dev Returns the number of addresses with voting rights
+	@returns numAdd Number of addresses
+	*/
+	function getNumAddresses() constant public returns (uint numAdd_) {
+		numAdd_ = addresses.length;
 	}
 
-	function getBallotName(uint ballotID) view public returns (string name_){
-		name_ = ballots[ballotID].name();
+
+	/* @dev Returns the name of the winning proposal in a certain ballot
+	@param _ballotID ID of the ballot
+	@returns name_ Name of winning proposal
+	*/
+	function getBallotName(uint _ballotID) view public returns (string name_){
+		name_ = ballots[_ballotID].name();
 	}
 	
 }
