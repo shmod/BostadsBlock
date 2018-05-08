@@ -54,15 +54,22 @@ App = {
 
   render: function() {
     var brfInstance;
+    var myAccount;
+    var chairPerson;
     //var loader = $("#loader");
-    var content = $("#content");
-
+    //var content = $("#content");
+    var propAdder = $("#propAdd");
     //loader.show();
-    content.hide();
+    //content.hide();
+
+    //hide the proposal adder
+    propAdder.hide();
     // Load account data
+
     web3.eth.getCoinbase(function(err, account) {
       if (err === null) {
         App.account = account;
+        myAccount = account;
         $("#accountAddress").html("Your Account: " + account);
       }
     });
@@ -72,7 +79,7 @@ App = {
     // Load contract data
     App.contracts.BRF.deployed().then(function(instance) {
       brfInstance = instance;
-      return brfInstance.getNumOfAddresses();
+      return brfInstance.getNumAddresses();
     }).then(function(numAdd) {
         id = numAdd;
         // for (var i = 1; i <= candidatesCount; i++) {
@@ -83,7 +90,10 @@ App = {
         return brfInstance.chairPerson();
       }).then(function(nameCP) {
         name = nameCP;
-        return brfInstance.getBallotSizes();
+        if (nameCP == myAccount) {
+          propAdder.show();
+        }
+        return brfInstance.getNumBallots();
       }).then(function(ballSize) {
         var candidatesResults = $("#candidatesResults");
         candidatesResults.empty();
@@ -116,16 +126,24 @@ App = {
     // }).catch(function(error) {
     //   console.warn(error);
     // });
-    content.show();
+     $('#accountAddress').show();
+
   },
 
   addBallot: function() {
     var ballotName = document.getElementById("bn").value;
+    var numProp = document.getElementById("Proposals1").value;
+    console.log(numProp);
+    var c = [];
+    for (var i = 0; i < numProp; i++) {
+      c.push(document.getElementById("p" + i).value);
+    }
     console.log(ballotName)
     App.contracts.BRF.deployed().then(function(instance) { 
-      return instance.createBallot("adslfg", [1,2]);
+      return instance.createBallot(ballotName, c);
     });
   },
+
 
 
   castVote: function() {
@@ -142,8 +160,54 @@ App = {
   }
 };
 
+
+
+function addFields() {
+  //Number of proposals
+  var number = document.getElementById("numProp").value;
+
+  // Container <dic> where propsals will be placed
+  var container = document.getElementById("Proposals1")
+  document.getElementById("Proposals1").setAttribute("value", number);
+  while (container.hasChildNodes()) {
+    container.removeChild(container.lastChild);
+  }
+
+  for (i=0;i<number;i++){
+    // Append a node with a random text
+    container.appendChild(document.createTextNode("Förslag " + (i+1)));
+    // Create an <input> element, set its type, class and name attributes
+    var input = document.createElement("input");
+    input.type = "number";
+    input.className = "form-control";
+    input.id = "p" + i;
+    container.appendChild(input);
+    // Append a line break
+    container.appendChild(document.createElement("br"));
+  }
+  var myButton = document.createElement("addVote");
+  var t = document.createTextNode("Lägg upp omröstning")
+  myButton.appendChild(t);
+  myButton.type = "submit";
+  myButton.className = "btn btn-primary";
+  myButton.addEventListener('click', function(event){App.addBallot()});
+  container.appendChild(myButton);
+};
+
 $(function() {
   $(window).load(function() {
     App.init();
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+

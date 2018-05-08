@@ -24,7 +24,7 @@
           <h1 class="text-center" id="BRFname">BRF Results</h1>
           <hr/>
           <br/>
-          <div id="content" style="display: none;">
+          <div id="content">
             <table class="table">
               <thead>
                 <tr>
@@ -37,17 +37,6 @@
               </tbody>
             </table>
             <hr/>
-            <form id="ballotForm" target="_blank" onSubmit="App.addBallot(); return false;">
-              Nytt förslag: <br>
-              <input type="text" ballotName="Name" id="bn"><br>
-              Förslag: <br>
-              <input type="text" proposalName="FirstProposal"><br>
-              Förslag: <br>
-              <input type="text" proposalName="SecondProposal"><br>
-              <button type:"submit class="btn btn-primary">Add Ballot</button> <br>
-
-            </form>
-
             <form onSubmit="App.castVote(); return false;">
               <div class="form-group">
                 <label for="ballotSelect">Select Proposal</label>
@@ -57,11 +46,27 @@
               <button type="submit" class="btn btn-primary">Vote</button>
               <hr />
             </form>
-            <p id="accountAddress" class="text-center"></p>
           </div>
         </div>
       </div>
     </div>
+
+    <div class ="container" id="propAdd" style="display: none;">
+            <form id="ballotForm" target="_blank">
+              Omröstning: <br>
+              <input type="text" ballotName="Name" id="bn" class="form-control">
+              <br>
+              Antal förslag: <br>
+              <input type="text" name="numProp" id="numProp" value="" class="form-control">
+              </br>
+              <a href="#" id="filldetails" onclick="addFields()" class ="btn btn-primary"> Fyll i detaljer</a>
+              <div id="Proposals1" value="">
+              </div>
+            </form>
+              <hr />
+
+    </div>
+          <p id="accountAddress" class="text-center" style="display: none">test?</p>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -71,4 +76,5 @@
     <script src="js/truffle-contract.js"></script>
     <script src="js/app.js"></script>
   </body>
+
 </html>
