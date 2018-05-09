@@ -47,7 +47,7 @@ App = {
       // }).watch(function(error, event) {
       //   console.log("event triggered", event)
         // Reload when a new vote is recorded
-        App.render();
+        console.log("event triggered");
       // });
     });
   },
@@ -98,23 +98,40 @@ App = {
         var candidatesResults = $("#candidatesResults");
         candidatesResults.empty();
 
-        var ballotSelect = $('#ballotSelect');
-        ballotSelect.empty();
 
         ballotSize = ballSize;
         // Render candidate Result
         var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + ballotSize + "</td></tr>"
         candidatesResults.append(candidateTemplate);
-        console.log("Hello!");
         // Render candidate ballot option
-        var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-        ballotSelect.append(candidateOption);
+        document.getElementById("ballotSelect").setAttribute("value",ballotSize);
+
         return brfInstance.name();
       }).then(function(brfname2) {
         var BRFname = $("#BRFname");
         BRFname.empty();
         BRFname.append(brfname2);
-      });
+        console.log(brfname2);
+        //Render list of ballots
+        var bS = document.getElementById("ballotSelect").getAttribute("value");
+        var ballotSelect = $('#ballotSelect');
+        ballotSelect.empty();
+        ballotSelect.empty();
+        let prom = App.contracts.BRF.deployed();
+        
+        App.contracts.BRF.deployed().then(function(instance){
+          brfInstance = instance;
+          for (var i = 0; i<bS; i++){
+            console.log(i);
+            instance.getBallotName(i).then(function(name){
+          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
+          ballotSelect.append(candidateOption);
+          })
+          }
+        });
+
+        });
+
     //   return electionInstance.voters(App.account);
     // }).then(function(hasVoted) {
     //   // Do not allow a user to vote
@@ -192,6 +209,7 @@ function addFields() {
   myButton.className = "btn btn-primary";
   myButton.addEventListener('click', function(event){App.addBallot()});
   container.appendChild(myButton);
+  console.log(document.getElementById("ballotSelect").getAttribute("value"));
 };
 
 $(function() {

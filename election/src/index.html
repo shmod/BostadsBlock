@@ -39,8 +39,8 @@
             <hr/>
             <form onSubmit="App.castVote(); return false;">
               <div class="form-group">
-                <label for="ballotSelect">Select Proposal</label>
-                <select class="form-control" id="ballotSelect">
+                <label for="ballotSelect" id="pSelect" value=0>Select Proposal</label>
+                <select class="form-control" id="ballotSelect" value="">
                 </select>
               </div>
               <button type="submit" class="btn btn-primary">Vote</button>
