@@ -68,20 +68,24 @@ contract("BRF", function(accounts) {
   it("Throws exception when voting on invalid ballot or proposals", function() {
     return BRF.deployed().then(function(instance) {
       brfInstance = instance; 
-      brfInstance.giveRightToVote(10,web3.eth.accounts[1]);
+      return brfInstance.giveRightToVote(0,web3.eth.accounts[2]);
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= -1, "error message must contain revert");
+      /*brfInstance.giveRightToVote(10,web3.eth.accounts[1]);
       brfInstance.giveRightToVote(10,web3.eth.accounts[2]);
       brfInstance.createBallot("One", [12,500,23]);
-      return brfInstance.vote(99, 1, {from : web3.eth.accounts[1] });
+      brfInstance.vote(0, 1, {from : web3.eth.accounts[1] });
     }).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
-      return brfInstance.vote(0, 3, {from : web3.eth.accounts[1] });
+      assert.include(error.message, 'proposalID', "Invalid proposalID")
+      //assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
+      /*return brfInstance.vote(0, 3, {from : web3.eth.accounts[1] });
     }).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");*/
     });
   });
 
 
-  it("Throws exception when voting without the right to do so", function() {
+  /*it("Throws exception when voting without the right to do so", function() {
     return BRF.deployed().then(function(instance) {
       brfInstance = instance; 
       brfInstance.giveRightToVote(10,web3.eth.accounts[1]);
@@ -93,9 +97,10 @@ contract("BRF", function(accounts) {
       assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
       
       //return brfInstance.vote(0, 1, {from : web3.eth.accounts[1] });
-    /*}).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");*/
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
     });
-  });
+  });*/
+
 
 });

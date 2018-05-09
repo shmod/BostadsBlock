@@ -55,7 +55,7 @@ contract BRF {
 	When a call is made later, the address will be able to vote with its shares. */
 	function giveRightToVote(uint weight, address currAdd) public {
 
-		require (weight > 0, "Cannot assign nonpositive values to our weights");
+		require (weight > 0, "Cannot assign nonpositive values to our weights. revert");
 		require (msg.sender == chairPerson, "You do not have permission to add a member");
 
 		/*This might be a problematic requirement if the weights change (mbe we make some 
