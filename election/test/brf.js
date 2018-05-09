@@ -61,6 +61,41 @@ contract("BRF", function(accounts) {
       return brfInstance.getWinner(1);
     }).then(function(winner){
       assert.equal(winner, 99, "Proposal \"99\" won");
-    })
+    });
   });
+
+  
+  it("Throws exception when voting on invalid ballot or proposals", function() {
+    return BRF.deployed().then(function(instance) {
+      brfInstance = instance; 
+      brfInstance.giveRightToVote(10,web3.eth.accounts[1]);
+      brfInstance.giveRightToVote(10,web3.eth.accounts[2]);
+      brfInstance.createBallot("One", [12,500,23]);
+      return brfInstance.vote(99, 1, {from : web3.eth.accounts[1] });
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
+      return brfInstance.vote(0, 3, {from : web3.eth.accounts[1] });
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
+    });
+  });
+
+
+  it("Throws exception when voting without the right to do so", function() {
+    return BRF.deployed().then(function(instance) {
+      brfInstance = instance; 
+      brfInstance.giveRightToVote(10,web3.eth.accounts[1]);
+      brfInstance.giveRightToVote(10,web3.eth.accounts[2]);
+      brfInstance.createBallot("One", [12,500,23]);
+      return brfInstance.vote(0, 1, {from : web3.eth.accounts[1] });
+    }).then(assert.fail).catch(function(error) {
+      
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
+      
+      //return brfInstance.vote(0, 1, {from : web3.eth.accounts[1] });
+    /*}).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");*/
+    });
+  });
+
 });

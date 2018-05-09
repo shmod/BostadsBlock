@@ -50,6 +50,7 @@ contract Ballot {
 	*/
  	function vote (uint proposalID, uint weight, address voterAddress) public onlyBRF {
  		require(voteRights[voterAddress] != 0, "You dont have the right to vote");
+ 		require(proposalID >= 0 && proposalID <proposals.length, "Invalid proposalID");
  		//require(now < startTime + durationTime, "Ballot is not live anymore");
  		if (voteRights[voterAddress] > 0) {
  			proposals[proposalID].voteCount += weight + uint(voteRights[voterAddress]);
