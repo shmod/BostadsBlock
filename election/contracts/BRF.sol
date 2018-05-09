@@ -148,6 +148,10 @@ contract BRF {
 		name_ = ballots[_ballotID].name();
 	}
 	
+	function getAddressWeight(uint _num) view public returns (address address_, uint weight_){
+		address_ = addresses[_num];
+		weight_ = weights[_num];
+	}
 }
 
 

@@ -98,7 +98,6 @@ App = {
         var candidatesResults = $("#candidatesResults");
         candidatesResults.empty();
 
-
         ballotSize = ballSize;
         // Render candidate Result
         var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + ballotSize + "</td></tr>"
@@ -111,7 +110,6 @@ App = {
         var BRFname = $("#BRFname");
         BRFname.empty();
         BRFname.append(brfname2);
-        console.log(brfname2);
         //Render list of ballots
         var bS = document.getElementById("ballotSelect").getAttribute("value");
         var ballotSelect = $('#ballotSelect');
@@ -122,15 +120,14 @@ App = {
         App.contracts.BRF.deployed().then(function(instance){
           brfInstance = instance;
           for (var i = 0; i<bS; i++){
-            console.log(i);
             instance.getBallotName(i).then(function(name){
-          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-          ballotSelect.append(candidateOption);
-          })
+              var candidateOption = "<option value='" + id + "'>" + name + "</ option>"
+              ballotSelect.append(candidateOption);
+            })
           }
         });
 
-        });
+      });
 
     //   return electionInstance.voters(App.account);
     // }).then(function(hasVoted) {
@@ -174,6 +171,66 @@ App = {
     }).catch(function(err) {
       console.error(err);
     });
+  },
+
+  showVote: function() {
+    var ballotSelect = document.getElementById("ballotSelect");
+    var i = ballotSelect.selectedIndex;
+    var text = ballotSelect.options.item(i).text;
+    console.log(text);
+    $("#Proposal").show();
+    var c2 = document.getElementById("Proposal");
+    while (c2.hasChildNodes()) {
+      c2.removeChild(c2.lastChild);
+    }
+    var myHeader = document.createElement("h2");
+    myHeader.appendChild(document.createTextNode(text));
+    c2.append(myHeader);
+
+    //Create and add the header (Adress, Andelar, Röst)
+    //to our site.
+    var table = document.createElement('table');
+    table.setAttribute("class", "table table-striped table'sm");
+    var tr = document.createElement("tr");
+    var th1 = document.createElement("th");
+    var th2 = document.createElement("th");
+    var th3 = document.createElement("th");
+    th1.appendChild(document.createTextNode("Adress"));
+    th2.appendChild(document.createTextNode("Andelar"));
+    th3.appendChild(document.createTextNode("Röst"));
+    tr.appendChild(th1);
+    tr.appendChild(th2);
+    tr.appendChild(th3);
+    table.appendChild(tr);
+
+    
+    //Add the values to the table
+    var tbody = document.createElement("tbody");
+    App.contracts.BRF.deployed().then(function(instance){
+      brfInstance = instance;
+      return brfInstance.getNumAddresses();
+    }).then(function (numAdd) {
+      for (var j = 0; j<numAdd; j++){
+        var add;
+        var weight;
+        var tr = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var td2 = document.createElement("td");
+        var td3 = document.createElement("td");
+        brfInstance.getAddressWeight(j).then(function(ret_){
+          td1.appendChild(document.createTextNode(ret_[0]));
+          td2.appendChild(document.createTextNode(ret_[1]));
+          td3.appendChild(document.createTextNode("Röst"));
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+          tr.appendChild(td3);
+          tbody.append(tr);
+          });
+      }
+    });
+    table.append(tbody);
+    c2.append(table);
+    c2.append(document.createElement("hr"))
   }
 };
 

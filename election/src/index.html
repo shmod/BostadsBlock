@@ -26,7 +26,6 @@
           <br/>
           <div id="content">
             <table class="table">
-              <thead>
                 <tr>
                   <th scope="col">Antal medlemmar</th>
                   <th scope="col">Ordförandes address</th>
@@ -37,15 +36,18 @@
               </tbody>
             </table>
             <hr/>
-            <form onSubmit="App.castVote(); return false;">
+            <form onSubmit="App.showVote(); return false;">
               <div class="form-group">
-                <label for="ballotSelect" id="pSelect" value=0>Select Proposal</label>
+                <label for="ballotSelect" id="pSelect" value=0>Välj fråga</label>
                 <select class="form-control" id="ballotSelect" value="">
                 </select>
               </div>
-              <button type="submit" class="btn btn-primary">Vote</button>
+              <button type="submit" class="btn btn-primary">Visa</button>
               <hr />
             </form>
+            <div id="Proposal" class="table-responsive" style="display:none;">
+            <hr/>
+            </div>
           </div>
         </div>
       </div>
