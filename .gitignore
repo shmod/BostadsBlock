@@ -1,6 +1,6 @@
 .DS_Store
-/build/contracts/Ballot.json
-/build/contracts/BRF.json
-/build/contracts/Migrations.json
-/build/contracts/Election.json
+election/build/contracts/Ballot.json
+election/build/contracts/BRF.json
+election/build/contracts/Migrations.json
+election/build/contracts/Election.json
 /Projektplan/
