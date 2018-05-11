@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+		pragma solidity ^0.4.19;
 
 /**
  * The Ballot contract does this and that...
@@ -21,6 +21,7 @@ contract Ballot {
 		//hash = "qe23rs!"
 	}
 
+	
 	Proposal[] public proposals;
 
 	/* Removed duration as input */
@@ -98,6 +99,28 @@ contract Ballot {
         winnerName_ = proposals[winningProposalID()].name;
     }
 
+	/* @dev Returns the number of proposals for a certain ballot  
+	@param _ballotId Id of the ballot
+	*/
+	function getNumProposals() view public returns(uint numB_){
+		numB_ = proposals.length;
+	}
+	
+	/* @dev Returns the name of a proposal 
+	@param _propId Id of the proposal
+	@returns name_ name of the proposal
+	*/
+	function getName(uint _propId) view public returns(int name_){
+		name_ = proposals[_propId].name;
+	}	
+
+	/* @dev Returns the number of votes a proposal has gotten  
+	@param _propId Id of the proposal
+	@returns voteCount_ Number of votes
+	*/
+	function getVoteCount(uint _propId) view public returns(uint voteCount_){
+		voteCount_ = proposals[_propId].voteCount;
+	}
 }
 
 												

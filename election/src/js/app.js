@@ -100,6 +100,7 @@ App = {
 
         ballotSize = ballSize;
         // Render candidate Result
+        console.log(ballotSize);
         var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + ballotSize + "</td></tr>"
         candidatesResults.append(candidateTemplate);
         // Render candidate ballot option
@@ -146,13 +147,11 @@ App = {
 
   addBallot: function() {
     var ballotName = document.getElementById("bn").value;
-    var numProp = document.getElementById("Proposals1").value;
-    console.log(numProp);
+    var numProp = document.getElementById("Proposals1").getAttribute("value");
     var c = [];
     for (var i = 0; i < numProp; i++) {
       c.push(document.getElementById("p" + i).value);
     }
-    console.log(ballotName)
     App.contracts.BRF.deployed().then(function(instance) { 
       return instance.createBallot(ballotName, c);
     });
@@ -195,9 +194,9 @@ App = {
     var th1 = document.createElement("th");
     var th2 = document.createElement("th");
     var th3 = document.createElement("th");
-    th1.appendChild(document.createTextNode("Adress"));
-    th2.appendChild(document.createTextNode("Andelar"));
-    th3.appendChild(document.createTextNode("Röst"));
+    th1.appendChild(document.createTextNode("Förslag"));
+    th2.appendChild(document.createTextNode("Antal röster"));
+    th3.appendChild(document.createTextNode("Vill vi ha något annat här?"));
     tr.appendChild(th1);
     tr.appendChild(th2);
     tr.appendChild(th3);
@@ -205,19 +204,23 @@ App = {
 
     
     //Add the values to the table
+    var numProp;
     var tbody = document.createElement("tbody");
     App.contracts.BRF.deployed().then(function(instance){
       brfInstance = instance;
-      return brfInstance.getNumAddresses();
-    }).then(function (numAdd) {
-      for (var j = 0; j<numAdd; j++){
+      return brfInstance.getNumProposals(i);
+    }).then(function (numProp_) {
+      numProp = numProp_;
+      console.log(numProp);
+      console.log(numProp[0]);
+      for (var j = 0; j<numProp; j++){
         var add;
         var weight;
-        var tr = document.createElement("tr");
-        var td1 = document.createElement("td");
-        var td2 = document.createElement("td");
-        var td3 = document.createElement("td");
-        brfInstance.getAddressWeight(j).then(function(ret_){
+        brfInstance.getProposal(i,j).then(function(ret_){
+          var tr = document.createElement("tr");
+          var td1 = document.createElement("td");
+          var td2 = document.createElement("td");
+          var td3 = document.createElement("td");
           td1.appendChild(document.createTextNode(ret_[0]));
           td2.appendChild(document.createTextNode(ret_[1]));
           td3.appendChild(document.createTextNode("Röst"));
