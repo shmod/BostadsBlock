@@ -148,6 +148,28 @@ contract BRF {
 		name_ = ballots[_ballotID].name();
 	}
 	
+	function getAddressWeight(uint _num) view public returns (address address_, uint weight_){
+		address_ = addresses[_num];
+		weight_ = weights[_num];
+	}
+	/* @dev Returns the number of proposals for a certain ballot  
+	@param _ballotId Id of the ballot
+	*/
+	function getNumProposals(uint _ballotId) view public returns(uint numB_){
+		numB_ = ballots[_ballotId].getNumProposals();
+	}
+
+	/* @dev returns a tuple of propsal and votes corresponding to a certain
+	proposal.
+	@param _ballotId Id of the ballot
+	@param _propId Id of the proposal
+	@returns name Name of the proposal
+	@returns votecount the number of votes on this proposal
+	*/
+	function getProposal(uint _ballotId, uint _propId) view public returns (int name_,uint voteCount_){
+		name_ = ballots[_ballotId].getName(_propId);
+		voteCount_ = ballots[_ballotId].getVoteCount(_propId);
+	}
 }
 
 
