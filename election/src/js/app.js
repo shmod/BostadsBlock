@@ -157,6 +157,14 @@ App = {
     });
   },
 
+  vote: function(ballotID, propID) {
+    console.log(ballotID);
+    console.log(this.parentNode.parentNode.rowIndex);
+    console.log(propID);
+    App.contracts.BRF.deployed().then(function(instance) {
+      return instance.vote(ballotID, propID, {from : App.account });
+    });//.then(App.render());
+  },
 
 
   castVote: function() {
@@ -195,8 +203,8 @@ App = {
     var th2 = document.createElement("th");
     var th3 = document.createElement("th");
     th1.appendChild(document.createTextNode("Förslag"));
-    th2.appendChild(document.createTextNode("Antal röster"));
-    th3.appendChild(document.createTextNode("Vill vi ha något annat här?"));
+    th2.appendChild(document.createTextNode("Röstmängd"));
+    th3.appendChild(document.createTextNode("Rösta"));
     tr.appendChild(th1);
     tr.appendChild(th2);
     tr.appendChild(th3);
@@ -216,6 +224,7 @@ App = {
       for (var j = 0; j<numProp; j++){
         var add;
         var weight;
+
         brfInstance.getProposal(i,j).then(function(ret_){
           var tr = document.createElement("tr");
           var td1 = document.createElement("td");
@@ -223,7 +232,13 @@ App = {
           var td3 = document.createElement("td");
           td1.appendChild(document.createTextNode(ret_[0]));
           td2.appendChild(document.createTextNode(ret_[1]));
-          td3.appendChild(document.createTextNode("Röst"));
+          var td3 = document.createElement("a");
+          var t = document.createTextNode("Rösta")
+          td3.appendChild(t);
+          td3.type = "submit";
+          td3.className = "btn btn-primary";
+          td3.addEventListener('click', function(event){App.vote(i,j)});
+          //td3.appendChild(document.createTextNode("Button"));
           tr.appendChild(td1);
           tr.appendChild(td2);
           tr.appendChild(td3);
