@@ -11,23 +11,6 @@ contract("BRF", function(accounts) {
     });
   });
 
-//   it("Adding 3 accounts", function() {
-//     return BRF.deployed().then(function(instance) {
-//     brfInstance = instance;
-//     brfInstance.giveRightToVote(10, web3.eth.accounts[1]);
-//     return brfInstance.getNumOfAddresses();
-//   }).then(function(nOfAdd) {
-//     assert.equal(nOfAdd, 1, "One address added")
-//     brfInstance.giveRightToVote(15, web3.eth.accounts[2]);
-//     return brfInstance.getNumOfAddresses();
-//   }).then(function (nOfAdd) {
-//     assert.equal(nOfAdd, 2, "Two addresses added")
-//     brfInstance.giveRightToVote(10, web3.eth.accounts[3]);
-//     return brfInstance.getNumOfAddresses();
-//   }).then(function (nOfAdd) {
-//     assert.equal(nOfAdd, 3, "Three addresses added")
-//   });
-// });
 
   it("Adding three accounts and 3 proposals and voting", function() {
     return BRF.deployed().then(function(instance) {
@@ -103,15 +86,3 @@ contract("BRF", function(accounts) {
   });
 
 });
-
-
-
-
-
-
-
-
-
-
-
-

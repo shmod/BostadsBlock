@@ -262,7 +262,7 @@ function addFields() {
     // Append a line break
     container.appendChild(document.createElement("br"));
   }
-  var myButton = document.createElement("addVote");
+  var myButton = document.createElement("a");
   var t = document.createTextNode("Lägg upp omröstning")
   myButton.appendChild(t);
   myButton.type = "submit";
