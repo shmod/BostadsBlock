@@ -158,12 +158,11 @@ App = {
   },
 
   vote: function(ballotID, propID) {
-    console.log(ballotID);
-    console.log(this.parentNode.parentNode.rowIndex);
-    console.log(propID);
     App.contracts.BRF.deployed().then(function(instance) {
       return instance.vote(ballotID, propID, {from : App.account });
-    });//.then(App.render());
+    }).catch(function(err) {
+      console.error(err);
+    });
   },
 
 
@@ -224,7 +223,6 @@ App = {
       for (var j = 0; j<numProp; j++){
         var add;
         var weight;
-
         brfInstance.getProposal(i,j).then(function(ret_){
           var tr = document.createElement("tr");
           var td1 = document.createElement("td");
@@ -237,12 +235,11 @@ App = {
           td3.appendChild(t);
           td3.type = "submit";
           td3.className = "btn btn-primary";
-          td3.addEventListener('click', function(event){App.vote(i,j)});
-          //td3.appendChild(document.createTextNode("Button"));
           tr.appendChild(td1);
           tr.appendChild(td2);
           tr.appendChild(td3);
           tbody.append(tr);
+          td3.addEventListener('click', function(event){App.vote(i,tr.rowIndex-1)});
           });
       }
     });
