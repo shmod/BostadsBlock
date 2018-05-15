@@ -79,13 +79,22 @@ contract Ballot {
  	/* @dev Computes the winning proposal by counting all previous votes. */
  	function winningProposalID () private view returns(uint proposalID_) {
  		//require(now > durationTime + startTime, "Ballot has not ended");
+ 		bool flag;
  		uint winningVoteCount = 0;
         for (uint p = 0; p < proposals.length; p++) {
             if (proposals[p].voteCount > winningVoteCount) {
                 winningVoteCount = proposals[p].voteCount;
                 proposalID_ = p;
+                flag = false;
+            }
+            else if (proposals[p].voteCount == winningVoteCount){
+            	flag = true;
             }
         }
+        if (flag == true){
+        	proposalID_ =  9999; 
+        }
+
  	}
  	
  	/* @dev If the current time is past the final voting time then this function
@@ -96,7 +105,13 @@ contract Ballot {
             returns (int winnerName_)
     {
     	//require(now - startTime > durationTime, "Vote not yet ended.");
-        winnerName_ = proposals[winningProposalID()].name;
+    	uint winningIndex = winningProposalID();
+    	if (winningIndex != 9999){
+        	winnerName_ = proposals[winningIndex].name;
+        }
+        else {
+        	return 9999;
+        }
     }
 
 	/* @dev Returns the number of proposals for a certain ballot  
