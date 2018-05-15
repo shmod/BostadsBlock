@@ -32,9 +32,9 @@ contract("BRF", function(accounts) {
       return brfInstance.getNumBallots();
     }).then(function(nOfBall) {
       assert.equal(nOfBall, 2, "2 ballots exist");
-      brfInstance.vote(0, 1, {from : web3.eth.accounts[1]});
+      brfInstance.vote(0, 2, {from : web3.eth.accounts[1]});
       brfInstance.vote(0, 1, {from : web3.eth.accounts[2]});
-      brfInstance.vote(0, 2, {from : web3.eth.accounts[3]});
+      brfInstance.vote(0, 1, {from : web3.eth.accounts[3]});
       return brfInstance.getWinner(0);
     }).then(function(winner) {
       assert.equal(winner, 500, "Proposal \"500\" won");

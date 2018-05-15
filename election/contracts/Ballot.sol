@@ -51,7 +51,7 @@ contract Ballot {
 	*/
  	function vote (uint proposalID, uint weight, address voterAddress) public onlyBRF {
  		require(voteRights[voterAddress] != 0, "You dont have the right to vote");
- 		require(proposalID >= 0 && proposalID <proposals.length, "Invalid proposalID");
+ 		require(proposalID >= 0 && proposalID < proposals.length, "Invalid proposalID");
  		//require(now < startTime + durationTime, "Ballot is not live anymore");
  		if (voteRights[voterAddress] > 0) {
  			proposals[proposalID].voteCount += weight + uint(voteRights[voterAddress]);
@@ -80,7 +80,7 @@ contract Ballot {
  	function winningProposalID () private view returns(uint proposalID_) {
  		//require(now > durationTime + startTime, "Ballot has not ended");
  		uint winningVoteCount = 0;
-        for (uint p = 0; p < proposals.length-1; p++) {
+        for (uint p = 0; p < proposals.length; p++) {
             if (proposals[p].voteCount > winningVoteCount) {
                 winningVoteCount = proposals[p].voteCount;
                 proposalID_ = p;
