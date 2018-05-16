@@ -1,30 +1,41 @@
 pragma solidity ^0.4.19;
 
-/* TODO:
-	Tomorrow we check how we test. Try setting it up on remix and trying with metamask and after that
-	trying to get together an app.
 
-	Should we implement a timelimit, in that case where (when to start/stop)?
-	How to retrieve the winning proposal in BRF.
-
-	How does the has look like (format, size etc.)?
-*/
-
-import "./Ballot.sol";
 /**
  * The BRF contract does this and that...
  */
 contract BRF {
 
-	mapping (address => uint) private memberWeights;	//Same thing as weights
-	address[] private addresses;
+	mapping (address => Member) private members;	//Same thing as weights
+	address[] private addressesList;
 	uint[] private weights;
 	address public chairPerson;
 	uint public sumWeights;
-	string public name;
+	string public brfName;
+	
+	struct Member {
+        uint weight; // weight is accumulated by delegation
+        mapping(bytes1 => bool) voted;  // if true, that person already voted in this ballot
+        address delegate; // person delegated to
+    }
 
-	Ballot[] public ballots;
-	uint public ballotStatus;
+	struct Proposal {
+		bytes1 name;
+		uint voteCount;
+		//hash = "qe23rs!"
+	}
+
+	struct Ballot {
+		bytes1 name;
+		bytes1[] proposalList;
+		mapping(bytes1 => Proposal) proposals;
+		// add mapping of who has voted for what
+	}
+
+	mapping (bytes1 => Ballot) ballots;
+	bytes1[] public ballotList;
+
+	uint private ballotStatus;
 
     // voted event
     event votedEvent (
@@ -32,16 +43,15 @@ contract BRF {
     );
 
 
-
 	constructor () public{
 		ballotStatus = 0;
 		chairPerson = msg.sender;
 		sumWeights = 0;
-		name = "BRF Solrosen";
+		brfName = "BRF Blockkedjan";
 		// weights = [25, 5, 2, 35, 15];
-		// addresses = [0xca35b7d915458ef540ade6068dfe2f44e8fa733c, 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c, 0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db, 0x583031d1113ad414f02576bd6afabfb302140225, 0xdd870fa1b7c4700f2bd7f44238821c26f7392148];
+		// addressesList = [0xca35b7d915458ef540ade6068dfe2f44e8fa733c, 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c, 0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db, 0x583031d1113ad414f02576bd6afabfb302140225, 0xdd870fa1b7c4700f2bd7f44238821c26f7392148];
 		// for (uint i = 0; i<weights.length; i++) {
-		// 	giveRightToVote(weights[i], addresses[i]);
+		// 	giveRightToVote(weights[i], addressesList[i]);
 		// }
 		// int[] storage input;
 		// input.push(1);
@@ -61,44 +71,55 @@ contract BRF {
 		/*This might be a problematic requirement if the weights change (mbe we make some 
 		appartments smaller etc.) */
 		require(sumWeights + weight <= 100, "Sum of all weights exceed the limit (100)"); 
-
-		memberWeights[currAdd] = weight;
+        require(members[currAdd].weight == 0, "The address already has voting rights.");
+		members[currAdd].weight = weight;
 		sumWeights += weight;
-		addresses.push(currAdd);
+		addressesList.push(currAdd);
 		weights.push(weight);
 	}
 
 
 	/* Transfer the ownership of one apartment from one owner to another */
 	function transferOwnership(address newOwner) public {
-		require(newOwner != msg.sender, "You cannot transfer the ownership to yourself");
-		memberWeights[newOwner] = memberWeights[msg.sender];
-		memberWeights[msg.sender] = 0;
-
-		for (uint i = 0; i<addresses.length; i++) {
-			if (addresses[i] == msg.sender) {
-				addresses[i] = newOwner;
-			}
-		}
+		
 	}
 
 
 	/* @dev Creates a new ballot and pushes it into the global array called ballots.
 	@param proposalNames array with proposalnames 
 	*/
-	function createBallot(string _ballotName, int[] proposalNames) public {
+	function createBallot(bytes1 _ballotName, bytes1[] proposalNames) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");
 		ballotStatus = 1;
-		ballots.push(new Ballot(_ballotName, addresses, proposalNames));
-	}
 
+		ballots[_ballotName].name = _ballotName;
+		ballotList.push(_ballotName);
+
+		for (uint i = 0; i < proposalNames.length; i++) {
+			ballots[_ballotName].proposalList.push(proposalNames[i]);
+			ballots[_ballotName].proposals[proposalNames[i]].name = proposalNames[i];
+		}
+
+		return true;
+	}
+	
+	
+	
 	/* 
 	@dev Votes for a proposal in a given ballot
 	@param ballotID The id of the ballot we are voting on
 	@param proposalID The id of the proposal we are voting on
 	*/
-	function vote(uint ballotID, uint proposalID) public {
-		ballots[ballotID].vote(proposalID, memberWeights[msg.sender], msg.sender);
+	function vote(bytes1 ballotID, bytes1 proposalID) public returns(bool succes){
+	    require(ballots[ballotID].name == ballotID, "No such ballots exist");
+	    require(ballots[ballotID].proposals[proposalID].name == proposalID, "No such proposal Exists");
+	
+	    require(members[msg.sender].voted[ballotID] == false, "Already voted in this ballot");
+	    
+	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight;
+	    members[msg.sender].voted[ballotID] = true;
+	    
+	    return true;
 	}
 
 	/* @dev Let's a member delegates it's shares in a certain ballot to another
@@ -107,25 +128,49 @@ contract BRF {
 	@param to The adress of the person it wants to delegate to.
 	*/
 	function delegateTo(uint ballotID, address to) public {
-		ballots[ballotID].delegate(memberWeights[msg.sender], to, msg.sender);
+	
 	}
 
 	/* @dev Calls the ballot to retrieve the winner and sets in motion the transaction
 	associated with the winning proposal.
 	@param ballotID The id of the associated
 	*/
-	function getWinner(uint ballotID) public view returns (int winnerName_){
-		winnerName_ = ballots[ballotID].winnerName();
+	function getWinner(bytes1 ballotID) public view returns (bytes1 winningProposal){
+ 		bool flag;
+ 		uint winningVoteCount = 0;
+ 		bytes1[] storage props = ballots[ballotID].proposalList;
+        for (uint p = 0; p < props.length; p++) {
+            if (ballots[ballotID].proposals[props[p]].voteCount > winningVoteCount) {
+                winningVoteCount = ballots[ballotID].proposals[props[p]].voteCount;
+                winningProposal = props[p];
+                flag = false;
+            }
+            else if (ballots[ballotID].proposals[props[p]].voteCount == winningVoteCount){
+            	flag = true;
+            }
+        }
+        if (flag == true){
+        	winningProposal =  0xFF; 
+        }
 	}
 
 	/* test help functions */
 
-	/* @dev Returns the number of ballots 
-	@returns numBallotsNumber of ballots created
+	/*
+	@ dev Returns the ID of the winning proposal as a string
+	@ param ballotID ID of the Ballot
+	@ returns @winningProposal Name of the winning proposal
 	*/
-	function getNumBallots() constant public returns (uint numBallots_) {
+	//function getWinnerString(bytes1 ballotID) public view returns (string winningProposal){
+	//	winningProposal = getWinner(ballotID);
+	//}
+	
+	/* @dev Returns the number of ballots 
+	@returns numBallot Number of ballots created
+	*/
+	function getNumBallots()  public view returns (uint numBallots_) {
 		if (ballotStatus == 1) {
-			numBallots_ =  ballots.length;
+			numBallots_ =  ballotList.length;
 		} else {
 			numBallots_ = 0;
 		}
@@ -133,30 +178,36 @@ contract BRF {
 
 
 	/* @dev Returns the number of addresses with voting rights
-	@returns numAdd Number of addresses
+	@returns numAdd_ Number of addresses
 	*/
-	function getNumAddresses() constant public returns (uint numAdd_) {
-		numAdd_ = addresses.length;
+	function getNumAddresses()  public view returns (uint numAdd_) {
+		numAdd_ = addressesList.length;
 	}
 
 
-	/* @dev Returns the name of the winning proposal in a certain ballot
-	@param _ballotID ID of the ballot
-	@returns name_ Name of winning proposal
+	/* @dev Returns the name of the ballot at a certain index
+	@param _ballotIndex Index of the ballot
+	@returns name_ Name of ballot
 	*/
-	function getBallotName(uint _ballotID) view public returns (string name_){
-		name_ = ballots[_ballotID].name();
+	function getBallotName(uint _ballotIndex)  view public returns (bytes1 name_){
+		name_ = ballotList[_ballotIndex];
 	}
 	
+	/* @dev Returns the address and weight of a member
+	@param _num Index (member number)
+    @returns address_ Address of the member
+    @returns weight_ Weight of the member
+    */
 	function getAddressWeight(uint _num) view public returns (address address_, uint weight_){
-		address_ = addresses[_num];
+		address_ = addressesList[_num];
 		weight_ = weights[_num];
 	}
+	
 	/* @dev Returns the number of proposals for a certain ballot  
 	@param _ballotId Id of the ballot
 	*/
-	function getNumProposals(uint _ballotId) view public returns(uint numB_){
-		numB_ = ballots[_ballotId].getNumProposals();
+	function getNumProposals(bytes1 _ballotId) view public returns(uint numProps_){
+		numProps_ = ballots[_ballotId].proposalList.length;
 	}
 
 	/* @dev returns a tuple of propsal and votes corresponding to a certain
@@ -167,12 +218,6 @@ contract BRF {
 	@returns votecount the number of votes on this proposal
 	*/
 	function getProposal(uint _ballotId, uint _propId) view public returns (int name_,uint voteCount_){
-		name_ = ballots[_ballotId].getName(_propId);
-		voteCount_ = ballots[_ballotId].getVoteCount(_propId);
+	
 	}
 }
-
-
-
-
-
