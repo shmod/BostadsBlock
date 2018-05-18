@@ -93,7 +93,7 @@ App = {
         if (nameCP == myAccount) {
           propAdder.show();
         }
-        return brfInstance.getNumBallots();
+        return brfInstance.numBallots();
       }).then(function(ballSize) {
         var candidatesResults = $("#candidatesResults");
         candidatesResults.empty();
@@ -106,7 +106,7 @@ App = {
         // Render candidate ballot option
         document.getElementById("ballotSelect").setAttribute("value",ballotSize);
 
-        return brfInstance.name();
+        return brfInstance.brfName();
       }).then(function(brfname2) {
         var BRFname = $("#BRFname");
         BRFname.empty();

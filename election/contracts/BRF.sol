@@ -12,30 +12,30 @@ contract BRF {
 	address public chairPerson;
 	uint public sumWeights;
 	string public brfName;
+	uint public numBallots;
 	
 	struct Member {
         uint weight; // weight is accumulated by delegation
-        mapping(bytes1 => bool) voted;  // if true, that person already voted in this ballot
+        mapping(uint => bool) voted;  // if true, that person already voted in this ballot
         address delegate; // person delegated to
     }
 
 	struct Proposal {
-		bytes1 name;
+		uint name;
+		uint ID;
 		uint voteCount;
 		//hash = "qe23rs!"
 	}
 
 	struct Ballot {
-		bytes1 name;
-		bytes1[] proposalList;
-		mapping(bytes1 => Proposal) proposals;
+		uint ID;
+		string name;
+		uint numProposals;
+		mapping(uint => Proposal) proposals;
 		// add mapping of who has voted for what
 	}
 
-	mapping (bytes1 => Ballot) ballots;
-	bytes1[] public ballotList;
-
-	uint private ballotStatus;
+	mapping (uint => Ballot) ballots;
 
     // voted event
     event votedEvent (
@@ -44,7 +44,7 @@ contract BRF {
 
 
 	constructor () public{
-		ballotStatus = 0;
+		numBallots = 0;
 		chairPerson = msg.sender;
 		sumWeights = 0;
 		brfName = "BRF Blockkedjan";
@@ -88,18 +88,20 @@ contract BRF {
 	/* @dev Creates a new ballot and pushes it into the global array called ballots.
 	@param proposalNames array with proposalnames 
 	*/
-	function createBallot(bytes1 _ballotName, bytes1[] proposalNames) public returns(bool succes) {
+	function createBallot(string _ballotName, uint[] proposalNames) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");
-		ballotStatus = 1;
+		
 
-		ballots[_ballotName].name = _ballotName;
-		ballotList.push(_ballotName);
+		ballots[numBallots].name = _ballotName;
+		ballots[numBallots].ID = numBallots;
 
 		for (uint i = 0; i < proposalNames.length; i++) {
-			ballots[_ballotName].proposalList.push(proposalNames[i]);
-			ballots[_ballotName].proposals[proposalNames[i]].name = proposalNames[i];
+			ballots[numBallots].proposals[i].name = proposalNames[i];
+			ballots[numBallots].proposals[i].ID = i;
 		}
 
+		ballots[numBallots].numProposals = proposalNames.length;
+		numBallots ++;
 		return true;
 	}
 	
@@ -110,10 +112,10 @@ contract BRF {
 	@param ballotID The id of the ballot we are voting on
 	@param proposalID The id of the proposal we are voting on
 	*/
-	function vote(bytes1 ballotID, bytes1 proposalID) public returns(bool succes){
-	    require(ballots[ballotID].name == ballotID, "No such ballots exist");
-	    require(ballots[ballotID].proposals[proposalID].name == proposalID, "No such proposal Exists");
-	
+	function vote(uint ballotID, uint proposalID) public returns(bool succes){
+	    require(ballots[ballotID].ID == ballotID, "No such ballots exist");
+	    require(ballots[ballotID].proposals[proposalID].ID == proposalID, "No such proposal Exists");
+		require(members[msg.sender].weight > 0, "You dont have the right to vote!");
 	    require(members[msg.sender].voted[ballotID] == false, "Already voted in this ballot");
 	    
 	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight;
@@ -135,22 +137,21 @@ contract BRF {
 	associated with the winning proposal.
 	@param ballotID The id of the associated
 	*/
-	function getWinner(bytes1 ballotID) public view returns (bytes1 winningProposal){
+	function getWinner(uint ballotID) public view returns (uint winningProposal){
  		bool flag;
  		uint winningVoteCount = 0;
- 		bytes1[] storage props = ballots[ballotID].proposalList;
-        for (uint p = 0; p < props.length; p++) {
-            if (ballots[ballotID].proposals[props[p]].voteCount > winningVoteCount) {
-                winningVoteCount = ballots[ballotID].proposals[props[p]].voteCount;
-                winningProposal = props[p];
+        for (uint p = 0; p < ballots[ballotID].numProposals; p++) {
+            if (ballots[ballotID].proposals[p].voteCount > winningVoteCount) {
+                winningVoteCount = ballots[ballotID].proposals[p].voteCount;
+                winningProposal = p;
                 flag = false;
             }
-            else if (ballots[ballotID].proposals[props[p]].voteCount == winningVoteCount){
+            else if (ballots[ballotID].proposals[p].voteCount == winningVoteCount){
             	flag = true;
             }
         }
         if (flag == true){
-        	winningProposal =  0xFF; 
+        	winningProposal =  999; 
         }
 	}
 
@@ -161,21 +162,9 @@ contract BRF {
 	@ param ballotID ID of the Ballot
 	@ returns @winningProposal Name of the winning proposal
 	*/
-	//function getWinnerString(bytes1 ballotID) public view returns (string winningProposal){
+	//function getWinnerString(uint ballotID) public view returns (string winningProposal){
 	//	winningProposal = getWinner(ballotID);
 	//}
-	
-	/* @dev Returns the number of ballots 
-	@returns numBallot Number of ballots created
-	*/
-	function getNumBallots()  public view returns (uint numBallots_) {
-		if (ballotStatus == 1) {
-			numBallots_ =  ballotList.length;
-		} else {
-			numBallots_ = 0;
-		}
-	}
-
 
 	/* @dev Returns the number of addresses with voting rights
 	@returns numAdd_ Number of addresses
@@ -189,8 +178,8 @@ contract BRF {
 	@param _ballotIndex Index of the ballot
 	@returns name_ Name of ballot
 	*/
-	function getBallotName(uint _ballotIndex)  view public returns (bytes1 name_){
-		name_ = ballotList[_ballotIndex];
+	function getBallotName(uint _ballotID)  view public returns (string name_){
+		name_ = ballots[_ballotID].name;
 	}
 	
 	/* @dev Returns the address and weight of a member
@@ -206,8 +195,8 @@ contract BRF {
 	/* @dev Returns the number of proposals for a certain ballot  
 	@param _ballotId Id of the ballot
 	*/
-	function getNumProposals(bytes1 _ballotId) view public returns(uint numProps_){
-		numProps_ = ballots[_ballotId].proposalList.length;
+	function getNumProposals(uint _ballotID) view public returns(uint numProps_){
+		numProps_ = ballots[_ballotID].numProposals;
 	}
 
 	/* @dev returns a tuple of propsal and votes corresponding to a certain
@@ -217,7 +206,18 @@ contract BRF {
 	@returns name Name of the proposal
 	@returns votecount the number of votes on this proposal
 	*/
-	function getProposal(uint _ballotId, uint _propId) view public returns (int name_,uint voteCount_){
-	
+	function getProposal(uint _ballotID, uint _propID) view public returns (uint name_,uint voteCount_){
+		name_ = ballots[_ballotID].proposals[_propID].name;
+		voteCount_ = ballots[_ballotID].proposals[_propID].voteCount;
+	}
+
+	function proposalExists(uint ballotID, uint proposalID) view public returns (bool x) {
+		x = (ballots[ballotID].proposals[proposalID].ID == proposalID);
+
+	}
+
+	function ballotExists(uint ballotID) view public returns (bool x) {
+		x = (ballots[ballotID].ID == ballotID);
+
 	}
 }
