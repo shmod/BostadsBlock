@@ -5,7 +5,7 @@ contract("BRF", function(accounts) {
 
   it("Initialize with 0 ballots", function() {
     return BRF.deployed().then(function(instance) {
-      return instance.getNumBallots();
+      return instance.numBallots();
     }).then(function(count) {
       assert.equal(count, 0);
     });
@@ -27,26 +27,26 @@ contract("BRF", function(accounts) {
       return brfInstance.getNumAddresses();
     }).then(function (nOfAdd) {
       assert.equal(nOfAdd, 3, "Three addresses added");
-      brfInstance.createBallot(0x00, [0x11, 0x22, 0x33]);
-      brfInstance.createBallot(0x01, [0x11,0x99]);
-      return brfInstance.getNumBallots();
+      brfInstance.createBallot("One", [11,22,33]);
+      brfInstance.createBallot("Two", [44,55]);
+      return brfInstance.numBallots();
     }).then(function(nOfBall) {
       assert.equal(nOfBall, 2, "2 ballots exist");
-      return brfInstance.getWinner(0x00);
+      return brfInstance.getWinner(0);
     }).then(function(winner) {
-      assert.equal(winner, 0xFF, "0xFF means it's a draw.");
-      brfInstance.vote(0x00, 0x22, {from : web3.eth.accounts[1]});
-      brfInstance.vote(0x00, 0x11, {from : web3.eth.accounts[2]});
-      brfInstance.vote(0x00, 0x11, {from : web3.eth.accounts[3]});
-      return brfInstance.getWinner(0x00);
+      assert.equal(winner, 999, "999 means it's a draw.");
+      brfInstance.vote(0, 0, {from : web3.eth.accounts[1]});
+      brfInstance.vote(0, 2, {from : web3.eth.accounts[2]});
+      brfInstance.vote(0, 2, {from : web3.eth.accounts[3]});
+      return brfInstance.getWinner(0);
     }).then(function(winner) {
-      assert.equal(winner, '0x11', "Proposal \"0x11\" won");
-      brfInstance.vote(0x01, 0x99, {from : web3.eth.accounts[1]});
-      brfInstance.vote(0x01, 0x99, {from : web3.eth.accounts[2]});
-      brfInstance.vote(0x01, 0x11, {from : web3.eth.accounts[3]});
-      return brfInstance.getWinner(0x01);
+      assert.equal(winner, 2, "Proposal \"0x11\" won");
+      brfInstance.vote(1, 1, {from : web3.eth.accounts[1]});
+      brfInstance.vote(1, 1, {from : web3.eth.accounts[2]});
+      brfInstance.vote(1, 0, {from : web3.eth.accounts[3]});
+      return brfInstance.getWinner(1);
     }).then(function(winner){
-      assert.equal(winner, 0x99, "Proposal \"0x99\" won");
+      assert.equal(winner, 1, "Proposal \"44\" won");
     });
   });
 
@@ -54,27 +54,28 @@ contract("BRF", function(accounts) {
   it("Throws exception when voting on invalid ballot or proposals or when not allowed to vote", function() {
     return BRF.deployed().then(function(instance) {
       brfInstance = instance; 
-      brfInstance.createBallot(0x02, [0x11,0x22,0x33]);
+      brfInstance.createBallot("Three", [11,22,33]);
       // vote for non-existent ballot
-      return brfInstance.vote(0x03,0x11, {from : web3.eth.accounts[1]});
+      return brfInstance.vote(3,0, {from : web3.eth.accounts[1]});
     }).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('invalid opcode') >= 0);
+      assert(error.message.indexOf('revert') >= 0, "non-existent ballot");
       // vote for non-existent proposal
-      return brfInstance.vote(0x02, 0x99,  {from : web3.eth.accounts[1]});
+      return brfInstance.vote(2, 99,  {from : web3.eth.accounts[1]});
     }).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('revert') >= 0 );
-      brfInstance.vote(0x02,0x33, {from: web3.eth.accounts[1]});
+      assert(error.message.indexOf('revert') >= 0 , "non-existent proposal");
+      return brfInstance.vote(2,0, {from: web3.eth.accounts[1]});
+    }).then(function() {
       // vote twice
-      return brfInstance.vote(0x02,0x33, {from: web3.eth.accounts[1]});
+      return brfInstance.vote(2,0, {from: web3.eth.accounts[1]});
     }).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('revert') >= 0 );
+      assert(error.message.indexOf('revert') >= 0 , "vote twice");
       return brfInstance.getWinner(2);
     }).then(function(winner){
-      assert.equal(winner,0x11, "proposal \"11\" won");
-      // forreign user voting
-      return brfInstance.vote(0x02,0x22, {from: web3.eth.accounts[9]});
+      assert.equal(winner,0, "proposal \"11\" won");
+      // foreign user voting
+      return brfInstance.vote(2,2, {from: web3.eth.accounts[9]});
       }).then(assert.fail).catch(function(error) {
-      assert(error.message.indexOf('revert') >= 0 );
+      assert(error.message.indexOf('revert') >= 0 , "foreign user voting");
     });
   });
 
