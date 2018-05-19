@@ -59,6 +59,7 @@ App = {
     //var loader = $("#loader");
     //var content = $("#content");
     var propAdder = $("#propAdd");
+    var giveRight = $("#giveRight");
     //loader.show();
     //content.hide();
 
@@ -92,6 +93,7 @@ App = {
         name = nameCP;
         if (nameCP == myAccount) {
           propAdder.show();
+          giveRight.show();
         }
         return brfInstance.numBallots();
       }).then(function(ballSize) {
@@ -177,6 +179,16 @@ App = {
     }).catch(function(err) {
       console.error(err);
     });
+  },
+
+  giveRight: function() {
+  var address = document.getElementById("addressName").value;
+  var weights = document.getElementById("numWeights").value;
+  console.log(address);
+  console.log(weights);
+  App.contracts.BRF.deployed().then(function(instance) {
+    return instance.giveRightToVote(weights, address)
+  });
   },
 
   showVote: function() {
@@ -283,6 +295,8 @@ function addFields() {
   container.appendChild(myButton);
   console.log(document.getElementById("ballotSelect").getAttribute("value"));
 };
+
+
 
 $(function() {
   $(window).load(function() {

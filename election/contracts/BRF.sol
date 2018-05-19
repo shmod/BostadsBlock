@@ -17,7 +17,7 @@ contract BRF {
 	struct Member {
         uint weight; // weight is accumulated by delegation
         mapping(uint => bool) voted;  // if true, that person already voted in this ballot
-        address delegate; // person delegated to
+		mapping(uint => uint) vote;        
     }
 
 	struct Proposal {
@@ -32,6 +32,8 @@ contract BRF {
 		string name;
 		uint numProposals;
 		mapping(uint => Proposal) proposals;
+		mapping(address => uint) delegate;		//Lets us check if an adress has been delegated to
+
 		// add mapping of who has voted for what
 	}
 
@@ -118,9 +120,9 @@ contract BRF {
 		require(members[msg.sender].weight > 0, "You dont have the right to vote!");
 	    require(members[msg.sender].voted[ballotID] == false, "Already voted in this ballot");
 	    
-	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight;
+	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight+ballots[ballotID].delegate[msg.sender];
 	    members[msg.sender].voted[ballotID] = true;
-	    
+	    members[msg.sender].vote[ballotID] = proposalID;
 	    return true;
 	}
 
@@ -130,7 +132,16 @@ contract BRF {
 	@param to The adress of the person it wants to delegate to.
 	*/
 	function delegateTo(uint ballotID, address to) public {
-	
+		require(members[msg.sender].voted[ballotID] == false, "You have already used up your votes");
+		require(ballots[ballotID].delegate[to] == 0, "To delegatee has already been delegated to");
+
+		members[msg.sender].voted[ballotID] == true;
+		if (members[to].voted[ballotID] != true) {
+			ballots[ballotID].delegate[to] = members[msg.sender].weight;
+		} else {
+			ballots[ballotID].proposals[members[to].vote[ballotID]].voteCount += members[msg.sender].weight;
+		}
+		
 	}
 
 	/* @dev Calls the ballot to retrieve the winner and sets in motion the transaction
@@ -219,5 +230,9 @@ contract BRF {
 	function ballotExists(uint ballotID) view public returns (bool x) {
 		x = (ballots[ballotID].ID == ballotID);
 
+	}
+
+	function myDelegates(uint ballotID) view public returns (uint x) {
+		x = ballots[ballotID].delegate[msg.sender];
 	}
 }
