@@ -33,7 +33,9 @@ contract BRF {
 		uint numProposals;
 		mapping(uint => Proposal) proposals;
 		mapping(address => uint) delegate;		//Lets us check if an adress has been delegated to
-
+		address[] newPerson;
+		int flag;
+		uint weight;
 		// add mapping of who has voted for what
 	}
 
@@ -44,6 +46,14 @@ contract BRF {
         uint indexed _candidateId
     );
 
+    event depositEvent (
+    	address sender;
+    	uint value;
+    	);
+
+    function deposit() payable {
+    	emit depositEvent(msg.sender, msg.value);
+    }
 
 	constructor () public{
 		numBallots = 0;
@@ -68,11 +78,10 @@ contract BRF {
 	function giveRightToVote(uint weight, address currAdd) public {
 
 		require (weight > 0, "Cannot assign nonpositive values to our weights. revert");
-		require (msg.sender == chairPerson, "You do not have permission to add a member");
+		//require (msg.sender == chairPerson, "You do not have permission to add a member");
 
 		/*This might be a problematic requirement if the weights change (mbe we make some 
 		appartments smaller etc.) */
-		require(sumWeights + weight <= 100, "Sum of all weights exceed the limit (100)"); 
         require(members[currAdd].weight == 0, "The address already has voting rights.");
 		members[currAdd].weight = weight;
 		sumWeights += weight;
@@ -87,16 +96,20 @@ contract BRF {
 	}
 
 
-	/* @dev Creates a new ballot and pushes it into the global array called ballots.
+	/* @dev Creates a new ballot and pushes it into the global array called ballots. When creating a ballot
+	regarding the addition of a member, the _flag is set to 1. Then the proposal 1 indicates a yesvote.
+	Right now 2 or more conflicting ballots could end up consuming the whole balance of the contract.
 	@param proposalNames array with proposalnames 
 	*/
-	function createBallot(string _ballotName, uint[] proposalNames) public returns(bool succes) {
-		require(msg.sender == chairPerson, "You cant create a ballot");
+	function createBallot(string _ballotName, uint[] proposalNames, int _flag, address[] _newPerson, uint _weight) public returns(bool succes) {
+		require(msg.sender == chairPerson, "You cant create a ballot");	
+		require (getBalance > weight, "Not enough ether on the contract");
 		
-
 		ballots[numBallots].name = _ballotName;
 		ballots[numBallots].ID = numBallots;
-
+		ballots[numBallots].flag = _flag;
+		ballots[numBallots].weight = _weight;
+		ballots[numBallots].newPerson = _newPerson;
 		for (uint i = 0; i < proposalNames.length; i++) {
 			ballots[numBallots].proposals[i].name = proposalNames[i];
 			ballots[numBallots].proposals[i].ID = i;
@@ -106,6 +119,12 @@ contract BRF {
 		numBallots ++;
 		return true;
 	}
+
+	/* @dev Creates a new ballot and pushes it into the global array called ballots.
+	When there is a majority vote the ballot will execute some function
+	@param proposalNames array with proposalnames
+	@param _contract adress to the contract */
+
 	
 	
 	
@@ -119,10 +138,19 @@ contract BRF {
 	    require(ballots[ballotID].proposals[proposalID].ID == proposalID, "No such proposal Exists");
 		require(members[msg.sender].weight > 0, "You dont have the right to vote!");
 	    require(members[msg.sender].voted[ballotID] == false, "Already voted in this ballot");
+	    require (ballots[ballotID].flag != 20, "Ballot is not live");
 	    
 	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight+ballots[ballotID].delegate[msg.sender];
 	    members[msg.sender].voted[ballotID] = true;
 	    members[msg.sender].vote[ballotID] = proposalID;
+	    if (ballots[ballotID].flag == 1 && hasWinner(ballotID) && getWinner(ballotID)==1) {
+	    	giveRightToVote(ballots[ballotID].weight, ballots[ballotID].newPerson[0]);
+	    	ballots[ballotID].flag = 20;
+	    } else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
+	    	uint l = getWinner(ballotID);
+	    	ballots[ballotID].newPerson[l].transfer(ballots[ballotID].weight);
+	    	ballots[ballotID].flag = 20;
+	    }
 	    return true;
 	}
 
@@ -166,6 +194,20 @@ contract BRF {
         }
 	}
 
+	/* @dev Checks that a proposal has a majority vote.
+	@param ballotID	ID of the ballot
+	*/
+
+	function hasWinner(uint ballotID) internal view returns(bool res) {
+		res = false;
+        for (uint p = 0; p < ballots[ballotID].numProposals; p++) {
+            if (ballots[ballotID].proposals[p].voteCount > sumWeights/2) {
+                res = true;
+            }
+        }
+
+	}
+	
 	/* test help functions */
 
 	/*
@@ -234,5 +276,9 @@ contract BRF {
 
 	function myDelegates(uint ballotID) view public returns (uint x) {
 		x = ballots[ballotID].delegate[msg.sender];
+	}
+
+	function getBalance() view public returns (uint x){
+		x = this.balance;
 	}
 }
