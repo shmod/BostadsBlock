@@ -52,7 +52,11 @@
         </div>
       </div>
     </div>
-
+    <div class = "container" id="cpButtons" style = "display: none"> 
+    <a href="#" id="showPropAdd" onclick="showPropAdd()" class ="btn btn-primary" > Skapa omröstning</a>
+    <a href="#" id="showPropAddTrans" onclick="showPropAddTrans()" class ="btn btn-primary" > Skapa omröstning med transaktion</a>
+    <a href="#" id="showMembAdd" onclick="showMembAdd()" class ="btn btn-primary" > Lägg till ny medlem</a>
+  </div>
     <div class ="container" id="propAdd" style="display: none;">
             <form id="ballotForm" target="_blank">
               Omröstning: <br>
@@ -67,6 +71,21 @@
             </form>
               <hr />
     </div>
+    <div class ="container" id="propAddTrans" style="display: none;">
+            <form id="ballotForm2" target="_blank">
+              Omröstning: <br>
+              <input type="text" ballotName="Name2" id="bn" class="form-control">
+              <br>
+              Antal förslag: <br>
+              <input type="text" name="numProp" id="numProp2" value="" class="form-control">
+              </br>
+              <a href="#" id="filldetails" onclick="addFields2()" class ="btn btn-primary"> Fyll i detaljer</a>
+              <div id="Proposals21" value="">
+              </div>
+            </form>
+              <hr />
+    </div>
+
     <div class = "container" id  = "giveRight" style ="display: none;">
       <form id="giveRightForm" target="_blank">
               Adress: <br>

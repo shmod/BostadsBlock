@@ -60,6 +60,7 @@ App = {
     //var content = $("#content");
     var propAdder = $("#propAdd");
     var giveRight = $("#giveRight");
+    var cpButtons = $("#cpButtons");
     //loader.show();
     //content.hide();
 
@@ -92,8 +93,7 @@ App = {
       }).then(function(nameCP) {
         name = nameCP;
         if (nameCP == myAccount) {
-          propAdder.show();
-          giveRight.show();
+          cpButtons.show();
         }
         return brfInstance.numBallots();
       }).then(function(ballSize) {
@@ -261,7 +261,31 @@ App = {
   }
 };
 
+function showMembAdd() {
+  var giveRight = $("#giveRight");
+  if (document.getElementById("giveRight").style.display == "none") {
+    giveRight.show();
+  } else {
+    giveRight.hide();
+  }
+}
 
+function showPropAdd() {
+  var propAdd = $("#propAdd");
+  if (document.getElementById("propAdd").style.display == "none") {
+    propAdd.show();
+  } else {
+    propAdd.hide();
+  }
+}
+function showPropAddTrans() {
+  var propAddTrans = $("#propAddTrans");
+  if (document.getElementById("propAddTrans").style.display == "none") {
+    propAddTrans.show();
+  } else {
+    propAddTrans.hide();
+  }
+}
 
 function addFields() {
   //Number of proposals
@@ -294,7 +318,75 @@ function addFields() {
   myButton.addEventListener('click', function(event){App.addBallot()});
   container.appendChild(myButton);
   console.log(document.getElementById("ballotSelect").getAttribute("value"));
-};
+}
+
+function addFields2() {
+  //Number of proposals
+  var number = document.getElementById("numProp2").value;
+
+  // Container <dic> where propsals will be placed
+  var container = document.getElementById("Proposals21");
+  document.getElementById("Proposals21").setAttribute("value", number);
+  var table = document.createElement('table');
+  table.setAttribute("class", "table table-striped table'sm");
+
+  while (container.hasChildNodes()) {
+    container.removeChild(container.lastChild);
+  }
+
+
+  for (i=0;i<number;i++){
+    // Append a node with a random text
+    //container.appendChild(document.createTextNode("Förslag " + (i+1)));
+   // container.appendChild(document.createTextNode("Adress " + (i+1)));
+   // container.appendChild(document.createTextNode("Kostnad " + (i+1)));
+
+
+    var tr = document.createElement("tr");
+    var th1 = document.createElement("th");
+    var th2 = document.createElement("th");
+    var th3 = document.createElement("th");
+    th1.appendChild(document.createTextNode("Förslag"));
+    th2.appendChild(document.createTextNode("Adress"));
+    th3.appendChild(document.createTextNode("Kostnad"));
+    tr.appendChild(th1);
+    tr.appendChild(th2);
+    tr.appendChild(th3);
+    table.appendChild(tr);
+
+    var trInput = document.createElement("tr");
+    var th1Input = document.createElement("th");
+    var th2Input = document.createElement("th");
+    var th3Input = document.createElement("th");
+    // Create an <input> element, set its type, class and name attributes
+    var input1 = document.createElement("input");
+    input1.type = "number";
+    input1.className = "form-control";
+    input1.id = "p" + i;
+    input1.size = "30"
+    trInput.appendChild(input1);
+    var input2 = document.createElement("input");
+    input2.className = "form-control";
+    input2.id = "address" + i;
+    trInput.appendChild(input2);
+    var input3 = document.createElement("input");
+    input3.type = "number";
+    input3.className = "form-control";
+    input3.id = "cost" + i;
+    trInput.appendChild(input3);
+    // Append a line break
+    table.appendChild(trInput);
+  }
+  container.appendChild(table);
+  var myButton = document.createElement("a");
+  var t = document.createTextNode("Lägg upp omröstning")
+  myButton.appendChild(t);
+  myButton.type = "submit";
+  myButton.className = "btn btn-primary";
+  myButton.addEventListener('click', function(event){App.addBallot()});
+  container.appendChild(myButton);
+  console.log(document.getElementById("ballotSelect").getAttribute("value"));
+}
 
 
 

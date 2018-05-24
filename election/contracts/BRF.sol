@@ -47,8 +47,8 @@ contract BRF {
     );
 
     event depositEvent (
-    	address sender;
-    	uint value;
+    	address sender,
+    	uint value
     	);
 
     function deposit() payable {
@@ -103,7 +103,7 @@ contract BRF {
 	*/
 	function createBallot(string _ballotName, uint[] proposalNames, int _flag, address[] _newPerson, uint _weight) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");	
-		require (getBalance > weight, "Not enough ether on the contract");
+		require (getBalance() > _weight, "Not enough ether on the contract");
 		
 		ballots[numBallots].name = _ballotName;
 		ballots[numBallots].ID = numBallots;
