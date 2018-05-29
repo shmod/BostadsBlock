@@ -2,24 +2,45 @@ pragma solidity ^0.4.19;
 
 
 /**
- * The BRF contract does this and that...
+ * @Author David Holst & Shad Mahmod. May 2018
+ * The BRF contract represents a housing co-op (Swedish Bostadsrättsförening (BRF)) and
+ * intends to simulate the voting process of such a co-op with the adding of ballots, 
+ * proposals and new members.
+ * 
  */
 contract BRF {
 
-	mapping (address => Member) private members;	//Same thing as weights
+
+	// voted event
+    event votedEvent (
+        uint indexed _candidateId
+    );
+
+    // deposit event
+    event depositEvent (
+    	address sender,
+    	uint value
+    );
+
+
+
+	mapping (address => Member) private members;
 	address[] private addressesList;
 	uint[] private weights;
 	address public chairPerson;
 	uint public sumWeights;
 	string public brfName;
 	uint public numBallots;
+	mapping (uint => Ballot) ballots;
 	
+	// Struct containing information of each member
 	struct Member {
         uint weight; // weight is accumulated by delegation
         mapping(uint => bool) voted;  // if true, that person already voted in this ballot
 		mapping(uint => uint) vote;        
     }
 
+    // Struct containing information of each proposal
 	struct Proposal {
 		uint name;
 		uint ID;
@@ -27,66 +48,55 @@ contract BRF {
 		//hash = "qe23rs!"
 	}
 
+	// Struct containing information of each Ballot
 	struct Ballot {
 		uint ID;
 		string name;
 		uint numProposals;
 		mapping(uint => Proposal) proposals;
 		mapping(address => uint) delegate;		//Lets us check if an adress has been delegated to
-		address[] newPerson;
+		address[] targetAddresses;
 		int flag;
-		uint weight;
+		uint targetValue;
 		// add mapping of who has voted for what
 	}
 
-	mapping (uint => Ballot) ballots;
 
-    // voted event
-    event votedEvent (
-        uint indexed _candidateId
-    );
 
-    event depositEvent (
-    	address sender,
-    	uint value
-    	);
-
-    function deposit() payable {
-    	emit depositEvent(msg.sender, msg.value);
-    }
-
+    /* @dev Constructor for BRF. Sets the caller address to be the co-ops chairperson 
+    * and other initial values.
+    */
 	constructor () public{
 		numBallots = 0;
 		chairPerson = msg.sender;
 		sumWeights = 0;
 		brfName = "BRF Blockkedjan";
-		// weights = [25, 5, 2, 35, 15];
-		// addressesList = [0xca35b7d915458ef540ade6068dfe2f44e8fa733c, 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c, 0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db, 0x583031d1113ad414f02576bd6afabfb302140225, 0xdd870fa1b7c4700f2bd7f44238821c26f7392148];
-		// for (uint i = 0; i<weights.length; i++) {
-		// 	giveRightToVote(weights[i], addressesList[i]);
-		// }
-		// int[] storage input;
-		// input.push(1);
-		// input.push(2);
-		// createBallot(input);
 	}
 
+	/* 
+	* @dev Deposits payable into the contract with which payments on behalf of the co-op 
+	* can be made.
+	* Emits depositEvent
+	*/
+	function deposit() payable {
+    	emit depositEvent(msg.sender, msg.value);
+    }
 
-	/* This function gets passed tuples of weights and addresses. Only the chairperson
-	will be allowed to call this function. The function assigns a weight to a certain address.
-	When a call is made later, the address will be able to vote with its shares. */
-	function giveRightToVote(uint weight, address currAdd) public {
-
+	/* @dev Gives voting rights with a certain weight to an address so that account 
+	* can vote in future ballots. Function can only be called from within the contract.
+	* @param weight The weight to be assigned to the address
+	* @param newAdd Address that is to be given voting rights
+	* @returns success Returns if function is successful 
+	*/
+	function giveRightToVote(uint weight, address newAdd) public returns(bool success){
 		require (weight > 0, "Cannot assign nonpositive values to our weights. revert");
-		//require (msg.sender == chairPerson, "You do not have permission to add a member");
-
-		/*This might be a problematic requirement if the weights change (mbe we make some 
-		appartments smaller etc.) */
-        require(members[currAdd].weight == 0, "The address already has voting rights.");
-		members[currAdd].weight = weight;
+        require(members[newAdd].weight == 0, "The address already has voting rights.");
+		members[newAdd].weight = weight;
 		sumWeights += weight;
-		addressesList.push(currAdd);
+		addressesList.push(newAdd);
 		weights.push(weight);
+
+		return true;
 	}
 
 
@@ -97,43 +107,44 @@ contract BRF {
 
 
 	/* @dev Creates a new ballot and pushes it into the global array called ballots. When creating a ballot
-	regarding the addition of a member, the _flag is set to 1. Then the proposal 1 indicates a yesvote.
-	Right now 2 or more conflicting ballots could end up consuming the whole balance of the contract.
-	@param proposalNames array with proposalnames 
+	* regarding the addition of a member, the _flag is set to 1. Then the proposal 1 indicates a yesvote. 
+	* If _flag i set to 2 the ballot is to send a transaction to the winning proposal address. If 
+	* _flag is anything else nothing in particular is to be done when there is a winning proposal.
+	* @param _ballotName Name of ballot created
+	* @param _proposalNames Array with names (ints) of created proposals
+	* @param _flag Flag saying what type of ballot it is.
+	* @param _targetAddresses Array of addresses targeted by the ballot. In case of giving new vote rights
+	* it contains the address to be given voting rights. In the case of sending a transaction it contains
+	* the different recipients of the resulting transaction.
+	* @param _targetValue The target value of the ballot. In case of giving new vote rights it is the new
+	* weights to be assigned to the address. In the case of sending a transaction it contains the sum to be 
+	* sent to the winning proposal.
+	* @returns success Returns whether the function was successfuly executed.
 	*/
-	function createBallot(string _ballotName, uint[] proposalNames, int _flag, address[] _newPerson, uint _weight) public returns(bool succes) {
+	function createBallot(string _ballotName, uint[] _proposalNames, int _flag, address[] _targetAddresses, uint _targetValue) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");	
 		require (getBalance() > _weight, "Not enough ether on the contract");
 		
 		ballots[numBallots].name = _ballotName;
 		ballots[numBallots].ID = numBallots;
 		ballots[numBallots].flag = _flag;
-		ballots[numBallots].weight = _weight;
-		ballots[numBallots].newPerson = _newPerson;
-		for (uint i = 0; i < proposalNames.length; i++) {
-			ballots[numBallots].proposals[i].name = proposalNames[i];
+		ballots[numBallots].targetValue = _targetValue;
+		ballots[numBallots].targetAddresses = _targetAddresses;
+		for (uint i = 0; i < _proposalNames.length; i++) {
+			ballots[numBallots].proposals[i].name = _proposalNames[i];
 			ballots[numBallots].proposals[i].ID = i;
 		}
-
-		ballots[numBallots].numProposals = proposalNames.length;
+		ballots[numBallots].numProposals = _proposalNames.length;
 		numBallots ++;
 		return true;
 	}
-
-	/* @dev Creates a new ballot and pushes it into the global array called ballots.
-	When there is a majority vote the ballot will execute some function
-	@param proposalNames array with proposalnames
-	@param _contract adress to the contract */
-
 	
-	
-	
-	/* 
-	@dev Votes for a proposal in a given ballot
-	@param ballotID The id of the ballot we are voting on
-	@param proposalID The id of the proposal we are voting on
+	/* @dev Votes for a proposal in a given ballot
+	* @param ballotID The id of the ballot we are voting on
+	* @param proposalID The id of the proposal we are voting on
+	* @returns success Returns whether the function was successfuly executed.
 	*/
-	function vote(uint ballotID, uint proposalID) public returns(bool succes){
+	function vote(uint ballotID, uint proposalID) public returns(bool success){
 	    require(ballots[ballotID].ID == ballotID, "No such ballots exist");
 	    require(ballots[ballotID].proposals[proposalID].ID == proposalID, "No such proposal Exists");
 		require(members[msg.sender].weight > 0, "You dont have the right to vote!");
@@ -143,10 +154,14 @@ contract BRF {
 	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight+ballots[ballotID].delegate[msg.sender];
 	    members[msg.sender].voted[ballotID] = true;
 	    members[msg.sender].vote[ballotID] = proposalID;
+	    // If ballot is meant to give voting rights to a new member, check if the result is 
+	    // yes then call giveRightToVote() with the desired information;
 	    if (ballots[ballotID].flag == 1 && hasWinner(ballotID) && getWinner(ballotID)==1) {
 	    	giveRightToVote(ballots[ballotID].weight, ballots[ballotID].newPerson[0]);
 	    	ballots[ballotID].flag = 20;
-	    } else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
+	    } 
+	    // Else if ballot is meant to send transaction to a target address, send to the winning proposal
+	    else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
 	    	uint l = getWinner(ballotID);
 	    	ballots[ballotID].newPerson[l].transfer(ballots[ballotID].weight);
 	    	ballots[ballotID].flag = 20;
@@ -155,11 +170,12 @@ contract BRF {
 	}
 
 	/* @dev Let's a member delegates it's shares in a certain ballot to another
-	member.
-	@param ballotID The ID of the ballot in which it wants to delegate.
-	@param to The adress of the person it wants to delegate to.
+	* member.
+	* @param ballotID The ID of the ballot in which it wants to delegate.
+	* @param to The adress of the person it wants to delegate to.
+	* @returns success Returns whether the function was successfuly executed.
 	*/
-	function delegateTo(uint ballotID, address to) public {
+	function delegateTo(uint ballotID, address to) public returns(bool success){
 		require(members[msg.sender].voted[ballotID] == false, "You have already used up your votes");
 		require(ballots[ballotID].delegate[to] == 0, "To delegatee has already been delegated to");
 
@@ -169,12 +185,12 @@ contract BRF {
 		} else {
 			ballots[ballotID].proposals[members[to].vote[ballotID]].voteCount += members[msg.sender].weight;
 		}
-		
 	}
 
-	/* @dev Calls the ballot to retrieve the winner and sets in motion the transaction
-	associated with the winning proposal.
-	@param ballotID The id of the associated
+	/* @dev Calls the ballot to retrieve the winning proposal id.
+	* @param ballotID The id of the associated
+	* @returns winningProposal The id (or index) of the winning proposal. Returns 
+	* 999 if there is a draw.
 	*/
 	function getWinner(uint ballotID) public view returns (uint winningProposal){
  		bool flag;
@@ -195,9 +211,9 @@ contract BRF {
 	}
 
 	/* @dev Checks that a proposal has a majority vote.
-	@param ballotID	ID of the ballot
+	* @param ballotID	ID of the ballot
+	* @returns res If we can call a winner
 	*/
-
 	function hasWinner(uint ballotID) internal view returns(bool res) {
 		res = false;
         for (uint p = 0; p < ballots[ballotID].numProposals; p++) {
@@ -205,7 +221,7 @@ contract BRF {
                 res = true;
             }
         }
-
+        // need to fix if many proposals!! 
 	}
 	
 	/* test help functions */
