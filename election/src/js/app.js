@@ -151,6 +151,19 @@ App = {
     var ballotName = document.getElementById("bn").value;
     var numProp = document.getElementById("Proposals1").getAttribute("value");
     var c = [];
+    var t = [];
+    for (var i = 0; i < numProp; i++) {
+      c.push(document.getElementById("p" + i).value);
+    }
+    App.contracts.BRF.deployed().then(function(instance) { 
+      return instance.createBallot(ballotName, c, 0, t, t);
+    });
+  },
+
+  addBallot: function() {
+    var ballotName = document.getElementById("bn").value;
+    var numProp = document.getElementById("Proposals1").getAttribute("value");
+    var c = [];
     for (var i = 0; i < numProp; i++) {
       c.push(document.getElementById("p" + i).value);
     }
@@ -347,6 +360,7 @@ function addFields2() {
     var th2 = document.createElement("th");
     var th3 = document.createElement("th");
     th1.appendChild(document.createTextNode("Förslag"));
+
     th2.appendChild(document.createTextNode("Adress"));
     th3.appendChild(document.createTextNode("Kostnad"));
     tr.appendChild(th1);
@@ -364,16 +378,19 @@ function addFields2() {
     input1.className = "form-control";
     input1.id = "p" + i;
     input1.size = "30"
-    trInput.appendChild(input1);
+    th1Input.appendChild(input1);
+    trInput.appendChild(th1Input);
     var input2 = document.createElement("input");
     input2.className = "form-control";
     input2.id = "address" + i;
-    trInput.appendChild(input2);
+    th2Input.appendChild(input2);
+    trInput.appendChild(th2Input);
     var input3 = document.createElement("input");
     input3.type = "number";
     input3.className = "form-control";
     input3.id = "cost" + i;
-    trInput.appendChild(input3);
+    th3Input.appendChild(input3);
+    trInput.appendChild(th3Input);
     // Append a line break
     table.appendChild(trInput);
   }
@@ -383,7 +400,7 @@ function addFields2() {
   myButton.appendChild(t);
   myButton.type = "submit";
   myButton.className = "btn btn-primary";
-  myButton.addEventListener('click', function(event){App.addBallot()});
+  myButton.addEventListener('click', function(event){App.addBallotWithProps()});
   container.appendChild(myButton);
   console.log(document.getElementById("ballotSelect").getAttribute("value"));
 }

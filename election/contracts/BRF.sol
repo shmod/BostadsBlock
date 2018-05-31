@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 
 
 /**
- * @Author David Holst & Shad Mahmod. May 2018
+ * Author David Holst & Shad Mahmod. May 2018
  * The BRF contract represents a housing co-op (Swedish Bostadsrättsförening (BRF)) and
  * intends to simulate the voting process of such a co-op with the adding of ballots, 
  * proposals and new members.
@@ -71,6 +71,7 @@ contract BRF {
 		chairPerson = msg.sender;
 		sumWeights = 0;
 		brfName = "BRF Blockkedjan";
+		giveRightToVote(10, msg.sender);
 	}
 
 	/* 
@@ -123,7 +124,7 @@ contract BRF {
 	*/
 	function createBallot(string _ballotName, uint[] _proposalNames, int _flag, address[] _targetAddresses, uint _targetValue) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");	
-		require (getBalance() > _weight, "Not enough ether on the contract");
+		require (getBalance() > _targetValue, "Not enough ether on the contract");
 		
 		ballots[numBallots].name = _ballotName;
 		ballots[numBallots].ID = numBallots;
@@ -157,13 +158,13 @@ contract BRF {
 	    // If ballot is meant to give voting rights to a new member, check if the result is 
 	    // yes then call giveRightToVote() with the desired information;
 	    if (ballots[ballotID].flag == 1 && hasWinner(ballotID) && getWinner(ballotID)==1) {
-	    	giveRightToVote(ballots[ballotID].weight, ballots[ballotID].newPerson[0]);
+	    	giveRightToVote(ballots[ballotID].targetValue, ballots[ballotID].targetAddresses[0]);
 	    	ballots[ballotID].flag = 20;
 	    } 
 	    // Else if ballot is meant to send transaction to a target address, send to the winning proposal
 	    else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
 	    	uint l = getWinner(ballotID);
-	    	ballots[ballotID].newPerson[l].transfer(ballots[ballotID].weight);
+	    	ballots[ballotID].targetAddresses[l].transfer(ballots[ballotID].targetValue);
 	    	ballots[ballotID].flag = 20;
 	    }
 	    return true;
@@ -295,6 +296,6 @@ contract BRF {
 	}
 
 	function getBalance() view public returns (uint x){
-		x = this.balance;
+		x = address(this).balance;
 	}
 }
