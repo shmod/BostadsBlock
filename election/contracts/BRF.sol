@@ -57,7 +57,7 @@ contract BRF {
 		mapping(address => uint) delegate;		//Lets us check if an adress has been delegated to
 		address[] targetAddresses;
 		int flag;
-		uint targetValue;
+		uint[] targetValues;
 		// add mapping of who has voted for what
 	}
 
@@ -117,19 +117,21 @@ contract BRF {
 	* @param _targetAddresses Array of addresses targeted by the ballot. In case of giving new vote rights
 	* it contains the address to be given voting rights. In the case of sending a transaction it contains
 	* the different recipients of the resulting transaction.
-	* @param _targetValue The target value of the ballot. In case of giving new vote rights it is the new
+	* @param _targetValues The target value of the ballot. In case of giving new vote rights it is the new
 	* weights to be assigned to the address. In the case of sending a transaction it contains the sum to be 
 	* sent to the winning proposal.
 	* @returns success Returns whether the function was successfuly executed.
 	*/
-	function createBallot(string _ballotName, uint[] _proposalNames, int _flag, address[] _targetAddresses, uint _targetValue) public returns(bool succes) {
+	function createBallot(string _ballotName, uint[] _proposalNames, int _flag, address[] _targetAddresses, uint[] _targetValues) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");	
-		require (getBalance() > _targetValue, "Not enough ether on the contract");
+		for(int i = 0; i<_targetValues.length; i++){
+			require (getBalance() > _targetValues[i], "Not enough ether on the contract");
+		}
 		
 		ballots[numBallots].name = _ballotName;
 		ballots[numBallots].ID = numBallots;
 		ballots[numBallots].flag = _flag;
-		ballots[numBallots].targetValue = _targetValue;
+		ballots[numBallots].targetValues = _targetValues;
 		ballots[numBallots].targetAddresses = _targetAddresses;
 		for (uint i = 0; i < _proposalNames.length; i++) {
 			ballots[numBallots].proposals[i].name = _proposalNames[i];
@@ -158,13 +160,13 @@ contract BRF {
 	    // If ballot is meant to give voting rights to a new member, check if the result is 
 	    // yes then call giveRightToVote() with the desired information;
 	    if (ballots[ballotID].flag == 1 && hasWinner(ballotID) && getWinner(ballotID)==1) {
-	    	giveRightToVote(ballots[ballotID].targetValue, ballots[ballotID].targetAddresses[0]);
+	    	giveRightToVote(ballots[ballotID].targetValues[0], ballots[ballotID].targetAddresses[0]);
 	    	ballots[ballotID].flag = 20;
 	    } 
 	    // Else if ballot is meant to send transaction to a target address, send to the winning proposal
 	    else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
 	    	uint l = getWinner(ballotID);
-	    	ballots[ballotID].targetAddresses[l].transfer(ballots[ballotID].targetValue);
+	    	ballots[ballotID].targetAddresses[l].transfer(ballots[ballotID].targetValues[l]);
 	    	ballots[ballotID].flag = 20;
 	    }
 	    return true;
