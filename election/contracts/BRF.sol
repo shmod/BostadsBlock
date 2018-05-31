@@ -162,8 +162,8 @@ contract BRF {
 	    // If ballot is meant to give voting rights to a new member, check if the result is 
 	    // yes then call giveRightToVote() with the desired information;
 	    if (ballots[ballotID].flag == 1 && hasWinner(ballotID) && getWinner(ballotID)==1) {
-	    	giveRightToVote(ballots[ballotID].targetValues[0], ballots[ballotID].targetAddresses[0]);
 	    	ballots[ballotID].flag = 20;
+	    	return giveRightToVote(ballots[ballotID].targetValues[0], ballots[ballotID].targetAddresses[0]);
 	    } 
 	    // Else if ballot is meant to send transaction to a target address, send to the winning proposal
 	    else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
