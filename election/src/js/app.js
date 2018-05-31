@@ -47,7 +47,7 @@ App = {
       // }).watch(function(error, event) {
       //   console.log("event triggered", event)
         // Reload when a new vote is recorded
-        console.log("event triggered");
+        //console.log("event triggered");
       // });
     });
   },
@@ -102,7 +102,6 @@ App = {
 
         ballotSize = ballSize;
         // Render candidate Result
-        console.log(ballotSize);
         var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + ballotSize + "</td></tr>"
         candidatesResults.append(candidateTemplate);
         // Render candidate ballot option
@@ -117,8 +116,6 @@ App = {
         var bS = document.getElementById("ballotSelect").getAttribute("value");
         var ballotSelect = $('#ballotSelect');
         ballotSelect.empty();
-        ballotSelect.empty();
-        let prom = App.contracts.BRF.deployed();
         
         App.contracts.BRF.deployed().then(function(instance){
           brfInstance = instance;
@@ -134,7 +131,6 @@ App = {
       }).then(function(mySaldo){
         var saldoVar = document.getElementById("Saldo");
         var text = "Saldo: " + mySaldo;
-        console.log(text);
         saldoVar.appendChild(document.createTextNode(text));
       });
 
@@ -177,9 +173,6 @@ App = {
       d.push(document.getElementById("address" + i).value);
       e.push(document.getElementById("cost" + i).value);
     }
-    console.log(c);
-    console.log(d);
-    console.log(e);
     App.contracts.BRF.deployed().then(function(instance) { 
       return instance.createBallot(ballotName, c, 2, d, e);
     });
@@ -187,7 +180,6 @@ App = {
 
   deposit: function() {
     var sum = document.getElementById("depositSum").value;
-    console.log(sum);
     App.contracts.BRF.deployed().then(function(instance) {
       return instance.deposit({value : sum, from : App.account});
     }).catch(function(err) {
@@ -220,8 +212,6 @@ App = {
   giveRight: function() {
   var address = document.getElementById("addressName").value;
   var weights = document.getElementById("numWeights").value;
-  console.log(address);
-  console.log(weights);
   App.contracts.BRF.deployed().then(function(instance) {
     return instance.giveRightToVote(weights, address)
   });
@@ -231,8 +221,8 @@ App = {
     var ballotSelect = document.getElementById("ballotSelect");
     var i = ballotSelect.selectedIndex;
     var text = ballotSelect.options.item(i).text;
-    console.log(text);
     $("#Proposal").show();
+    $("#Delegate").show();
     var c2 = document.getElementById("Proposal");
     while (c2.hasChildNodes()) {
       c2.removeChild(c2.lastChild);
@@ -266,8 +256,6 @@ App = {
       return brfInstance.getNumProposals(i);
     }).then(function (numProp_) {
       numProp = numProp_;
-      console.log(numProp);
-      console.log(numProp[0]);
       for (var j = 0; j<numProp; j++){
         var add;
         var weight;
@@ -294,7 +282,48 @@ App = {
     table.append(tbody);
     c2.append(table);
     c2.append(document.createElement("hr"))
-  }
+  },
+
+  showDelegate: function() {
+  var addresses = document.createElement("select");
+  addresses.setAttribute("id", "selectedAddress");
+  addresses.setAttribute("class", "form-control");
+  App.contracts.BRF.deployed().then(function(instance){
+    brfInstance = instance;
+   return brfInstance.getNumAddresses().then(function(numAdds){
+    for (var i = 0; i<numAdds; i++){
+      instance.getAddressAtIndex(i).then(function(address){
+      var temp = document.createElement("option");
+      temp.appendChild(document.createTextNode(address));
+      addresses.appendChild(temp);  
+    });
+    }
+  });
+  });
+  var container = $("#addressMenu");
+  container.empty();
+  container = document.getElementById("addressMenu");
+  container.appendChild(addresses);
+  var newButton = document.createElement("a");
+  newButton.className = "btn btn-primary";
+  var t = document.createTextNode("Delegera")
+  newButton.appendChild(t);
+  newButton.type = "submit";
+  newButton.addEventListener('click', function(event){App.delegateTo()});
+  container.appendChild(newButton);
+},
+
+delegateTo: function() {
+  var ballotSelect = document.getElementById("ballotSelect");
+  var i = ballotSelect.selectedIndex;
+  var address = document.getElementById("selectedAddress").value;
+  App.contracts.BRF.deployed().then(function(instance){
+      brfInstance = instance;
+      return brfInstance.delegateTo(i,address);
+      }).catch(function(err) {
+      console.error(err);
+    });
+}
 };
 
 function showMembAdd() {
@@ -391,7 +420,6 @@ function addFields() {
   myButton.className = "btn btn-primary";
   myButton.addEventListener('click', function(event){App.addBallot()});
   container.appendChild(myButton);
-  console.log(document.getElementById("ballotSelect").getAttribute("value"));
 }
 
 function addFields2() {
@@ -410,12 +438,6 @@ function addFields2() {
 
 
   for (i=0;i<number;i++){
-    // Append a node with a random text
-    //container.appendChild(document.createTextNode("Förslag " + (i+1)));
-   // container.appendChild(document.createTextNode("Adress " + (i+1)));
-   // container.appendChild(document.createTextNode("Kostnad " + (i+1)));
-
-
     var tr = document.createElement("tr");
     var th1 = document.createElement("th");
     var th2 = document.createElement("th");
@@ -452,7 +474,6 @@ function addFields2() {
     input3.id = "cost" + i;
     th3Input.appendChild(input3);
     trInput.appendChild(th3Input);
-    // Append a line break
     table.appendChild(trInput);
   }
   container.appendChild(table);
@@ -463,7 +484,6 @@ function addFields2() {
   myButton.className = "btn btn-primary";
   myButton.addEventListener('click', function(event){App.addBallotWithProps()});
   container.appendChild(myButton);
-  console.log(document.getElementById("ballotSelect").getAttribute("value"));
 }
 
 
