@@ -160,15 +160,19 @@ App = {
     });
   },
 
-  addBallot: function() {
+  addBallotWithProps: function() {
     var ballotName = document.getElementById("bn").value;
-    var numProp = document.getElementById("Proposals1").getAttribute("value");
+    var numProp = document.getElementById("Proposals21").getAttribute("value");
     var c = [];
+    var d = [];
+    var e = [];
     for (var i = 0; i < numProp; i++) {
-      c.push(document.getElementById("p" + i).value);
+      c.push(document.getElementById("prop" + i).value);
+      d.push(document.getElementById("address" + i).value);
+      e.push(document.getElementById("cost" + i).value);
     }
     App.contracts.BRF.deployed().then(function(instance) { 
-      return instance.createBallot(ballotName, c);
+      return instance.createBallot(ballotName, c, 2, d, e);
     });
   },
 
@@ -376,7 +380,7 @@ function addFields2() {
     var input1 = document.createElement("input");
     input1.type = "number";
     input1.className = "form-control";
-    input1.id = "p" + i;
+    input1.id = "prop" + i;
     input1.size = "30"
     th1Input.appendChild(input1);
     trInput.appendChild(th1Input);
