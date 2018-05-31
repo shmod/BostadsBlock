@@ -124,8 +124,10 @@ contract BRF {
 	*/
 	function createBallot(string _ballotName, uint[] _proposalNames, int _flag, address[] _targetAddresses, uint[] _targetValues) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");	
-		for(uint i = 0; i<_targetValues.length; i++){
-			require (getBalance() > _targetValues[i], "Not enough ether on the contract");
+		if(_flag == 2){
+			for(uint i = 0; i<_targetValues.length; i++){
+				require (getBalance() > _targetValues[i], "Not enough ether on the contract");
+			}
 		}
 		
 		ballots[numBallots].name = _ballotName;
