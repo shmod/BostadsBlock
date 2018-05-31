@@ -22,6 +22,7 @@
       <div class="row">
         <div class="col-lg-12">
           <h1 class="text-center" id="BRFname">BRF Results</h1>
+          <h3 class="text-center" id="Saldo"> </h3>
           <hr/>
           <br/>
           <div id="content">
@@ -55,7 +56,8 @@
     <div class = "container" id="cpButtons" style = "display: none"> 
     <a href="#" id="showPropAdd" onclick="showPropAdd()" class ="btn btn-primary" > Skapa omröstning</a>
     <a href="#" id="showPropAddTrans" onclick="showPropAddTrans()" class ="btn btn-primary" > Skapa omröstning med transaktion</a>
-    <a href="#" id="showMembAdd" onclick="showMembAdd()" class ="btn btn-primary" > Lägg till ny medlem</a>
+    <a href="#" id="showMembAdd" onclick="showMembAdd()" class ="btn btn-primary" > Lägg till ny medlem</a>    
+    <a href="#" id="showDeposit" onclick="showDeposit()" class ="btn btn-primary" > Ny insättning </a>
   </div>
     <div class ="container" id="propAdd" style="display: none;">
             <form id="ballotForm" target="_blank">
@@ -74,7 +76,7 @@
     <div class ="container" id="propAddTrans" style="display: none;">
             <form id="ballotForm2" target="_blank">
               Omröstning: <br>
-              <input type="text" ballotName="Name2" id="bn" class="form-control">
+              <input type="text" ballotName="Name2" id="bn2" class="form-control">
               <br>
               Antal förslag: <br>
               <input type="text" name="numProp" id="numProp2" value="" class="form-control">
@@ -107,6 +109,15 @@
 
 
 
+    </div>
+    <div class ="container" id="deposit" style="display: none;">
+            <form id="ballotDeposit" target="_blank">
+              Summa: <br>
+              <input type="text" id="depositSum" class="form-control">
+              <br>
+              <a href="#" id="filldetails" onclick="App.deposit()" class ="btn btn-primary"> Gör insättning</a>
+            </form>
+              <hr />
     </div>
           <p id="accountAddress" class="text-center" style="display: none">test?</p>
 

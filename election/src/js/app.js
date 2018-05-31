@@ -130,6 +130,12 @@ App = {
           }
         });
 
+        return brfInstance.getBalance();
+      }).then(function(mySaldo){
+        var saldoVar = document.getElementById("Saldo");
+        var text = "Saldo: " + mySaldo;
+        console.log(text);
+        saldoVar.appendChild(document.createTextNode(text));
       });
 
     //   return electionInstance.voters(App.account);
@@ -151,7 +157,7 @@ App = {
     var ballotName = document.getElementById("bn").value;
     var numProp = document.getElementById("Proposals1").getAttribute("value");
     var c = [];
-    var t = [];
+    var t = [0];
     for (var i = 0; i < numProp; i++) {
       c.push(document.getElementById("p" + i).value);
     }
@@ -161,7 +167,7 @@ App = {
   },
 
   addBallotWithProps: function() {
-    var ballotName = document.getElementById("bn").value;
+    var ballotName = document.getElementById("bn2").value;
     var numProp = document.getElementById("Proposals21").getAttribute("value");
     var c = [];
     var d = [];
@@ -171,8 +177,21 @@ App = {
       d.push(document.getElementById("address" + i).value);
       e.push(document.getElementById("cost" + i).value);
     }
+    console.log(c);
+    console.log(d);
+    console.log(e);
     App.contracts.BRF.deployed().then(function(instance) { 
       return instance.createBallot(ballotName, c, 2, d, e);
+    });
+  },
+
+  deposit: function() {
+    var sum = document.getElementById("depositSum").value;
+    console.log(sum);
+    App.contracts.BRF.deployed().then(function(instance) {
+      return instance.deposit({value : sum, from : App.account});
+    }).catch(function(err) {
+      console.error(err);
     });
   },
 
@@ -280,8 +299,14 @@ App = {
 
 function showMembAdd() {
   var giveRight = $("#giveRight");
+  var propAdd = $("#propAdd");
+  var propAddTrans = $("#propAddTrans");
+  var deposit = $("#deposit");
   if (document.getElementById("giveRight").style.display == "none") {
     giveRight.show();
+    propAdd.hide();
+    propAddTrans.hide();
+    deposit.hide();
   } else {
     giveRight.hide();
   }
@@ -289,18 +314,50 @@ function showMembAdd() {
 
 function showPropAdd() {
   var propAdd = $("#propAdd");
+  var giveRight = $("#giveRight");
+  var propAddTrans = $("#propAddTrans");
+  var deposit = $("#deposit");
+
   if (document.getElementById("propAdd").style.display == "none") {
     propAdd.show();
+    giveRight.hide();
+    propAddTrans.hide();
+    deposit.hide();
   } else {
     propAdd.hide();
   }
 }
 function showPropAddTrans() {
   var propAddTrans = $("#propAddTrans");
+  var giveRight = $("#giveRight");
+  var propAdd = $("#propAdd");
+  var deposit = $("#deposit");
+
   if (document.getElementById("propAddTrans").style.display == "none") {
     propAddTrans.show();
+    propAdd.hide();
+    giveRight.hide();    
+    deposit.hide();
+
   } else {
     propAddTrans.hide();
+  }
+}
+
+function showDeposit() {
+  var propAddTrans = $("#propAddTrans");
+  var giveRight = $("#giveRight");
+  var propAdd = $("#propAdd");
+  var deposit = $("#deposit");
+
+  if (document.getElementById("deposit").style.display == "none") {
+    propAddTrans.hide();
+    propAdd.hide();
+    giveRight.hide();    
+    deposit.show();
+
+  } else {
+    deposit.hide();
   }
 }
 
