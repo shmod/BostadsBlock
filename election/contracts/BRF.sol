@@ -124,7 +124,7 @@ contract BRF {
 	*/
 	function createBallot(string _ballotName, uint[] _proposalNames, int _flag, address[] _targetAddresses, uint[] _targetValues) public returns(bool succes) {
 		require(msg.sender == chairPerson, "You cant create a ballot");	
-		for(int i = 0; i<_targetValues.length; i++){
+		for(uint i = 0; i<_targetValues.length; i++){
 			require (getBalance() > _targetValues[i], "Not enough ether on the contract");
 		}
 		
@@ -133,7 +133,7 @@ contract BRF {
 		ballots[numBallots].flag = _flag;
 		ballots[numBallots].targetValues = _targetValues;
 		ballots[numBallots].targetAddresses = _targetAddresses;
-		for (uint i = 0; i < _proposalNames.length; i++) {
+		for (i = 0; i < _proposalNames.length; i++) {
 			ballots[numBallots].proposals[i].name = _proposalNames[i];
 			ballots[numBallots].proposals[i].ID = i;
 		}
@@ -188,6 +188,7 @@ contract BRF {
 		} else {
 			ballots[ballotID].proposals[members[to].vote[ballotID]].voteCount += members[msg.sender].weight;
 		}
+		return true;
 	}
 
 	/* @dev Calls the ballot to retrieve the winning proposal id.
