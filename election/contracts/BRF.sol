@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 
 
 /**
- * Author David Holst & Shad Mahmod. May 2018
+ * Written April-May 2018
  * The BRF contract represents a housing co-op (Swedish Bostadsrättsförening (BRF)) and
  * intends to simulate the voting process of such a co-op with the adding of ballots, 
  * proposals and new members.
@@ -153,7 +153,7 @@ contract BRF {
 	    require(ballots[ballotID].ID == ballotID, "No such ballots exist");
 	    require(ballots[ballotID].proposals[proposalID].ID == proposalID, "No such proposal Exists");
 		require(members[msg.sender].weight > 0, "You dont have the right to vote!");
-	    require(members[msg.sender].voted[ballotID] == false, "Already voted in this ballot");
+	    require(members[msg.sender].voted[ballotID] != true, "Already voted in this ballot");
 	    require (ballots[ballotID].flag != 20, "Ballot is not live");
 	    
 	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight+ballots[ballotID].delegate[msg.sender];
@@ -181,13 +181,13 @@ contract BRF {
 	* @returns success Returns whether the function was successfuly executed.
 	*/
 	function delegateTo(uint ballotID, address to) public returns(bool success){
-		require(members[msg.sender].voted[ballotID] == false, "You have already used up your votes");
+		require(members[msg.sender].voted[ballotID] != true, "You have already used up your votes");
 		require(ballots[ballotID].delegate[to] == 0, "To delegatee has already been delegated to");
-
-		members[msg.sender].voted[ballotID] == true;
-		if (members[to].voted[ballotID] != true) {
-			ballots[ballotID].delegate[to] = members[msg.sender].weight;
-		} else {
+		require(to!=msg.sender);
+		
+		members[msg.sender].voted[ballotID] = true;
+		ballots[ballotID].delegate[to] = members[msg.sender].weight;
+		if (members[to].voted[ballotID] == true) {
 			ballots[ballotID].proposals[members[to].vote[ballotID]].voteCount += members[msg.sender].weight;
 		}
 		return true;
@@ -288,12 +288,10 @@ contract BRF {
 
 	function proposalExists(uint ballotID, uint proposalID) view public returns (bool x) {
 		x = (ballots[ballotID].proposals[proposalID].ID == proposalID);
-
 	}
 
 	function ballotExists(uint ballotID) view public returns (bool x) {
 		x = (ballots[ballotID].ID == ballotID);
-
 	}
 
 	function myDelegates(uint ballotID) view public returns (uint x) {
@@ -302,5 +300,13 @@ contract BRF {
 
 	function getBalance() view public returns (uint x){
 		x = address(this).balance;
+	}
+
+	/* @dev Returns the address  of a member at a certain index
+	@param _num Index Index of address
+    @returns address_ Address of the member
+    */
+	function getAddressAtIndex(uint _num) view public returns (address address_){
+		address_ = addressesList[_num];
 	}
 }

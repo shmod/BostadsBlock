@@ -92,6 +92,32 @@ contract("BRF", function(accounts) {
     });
   });
 
+  it("Testing the Delegate function", function() {
+    return BRF.deployed().then(function(instance) {
+      brfInstance = instance; 
+      brfInstance.createBallot("delegate", [11,22], 0, [], []);
+      brfInstance.delegateTo(5, web3.eth.accounts[0], {from: web3.eth.accounts[1]});
+      //console.log(brfInstance.)
+      //attempting to vote after having delegated.
+      return brfInstance.vote(5,0,{from : web3.eth.accounts[1]});
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "voting after delegating");
+      brfInstance.numBallots();
+    }).then(function(nOfBall){
+      assert.equal(nOfBall,6, "numBallots");
+      // delegating a second time
+      return brfInstance.delegateTo(5,web3.eth.accounts[2], {from: web3.eth.accounts[1]});
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "delegating twice");
+      // delegating when being delegated to already
+      return brfInstance.delegateTo(5,web3.eth.accounts[1], {from: web3.eth.accounts[0]});
+    }).then(assert.fail).catch(function(error) {
+      console.log(error);
+      assert(error.message.indexOf('revert') >= 0, "second step delegating");
+      
+    });
+  });
+
 
   /*it("attempts to give right to vote from another address", function() {
     return BRF.deployed().then(function(instance) {

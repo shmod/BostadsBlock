@@ -213,6 +213,7 @@ App = {
   var address = document.getElementById("addressName").value;
   var weights = document.getElementById("numWeights").value;
   App.contracts.BRF.deployed().then(function(instance) {
+    // Ändra!!! 
     return instance.giveRightToVote(weights, address)
   });
   },
@@ -356,6 +357,7 @@ function showPropAdd() {
     propAdd.hide();
   }
 }
+
 function showPropAddTrans() {
   var propAddTrans = $("#propAddTrans");
   var giveRight = $("#giveRight");
