@@ -228,6 +228,8 @@ App = {
     while (c2.hasChildNodes()) {
       c2.removeChild(c2.lastChild);
     }
+    c2.append(document.createElement("hr"));
+
     var myHeader = document.createElement("h2");
     myHeader.appendChild(document.createTextNode(text));
     c2.append(myHeader);
@@ -282,10 +284,11 @@ App = {
     });
     table.append(tbody);
     c2.append(table);
-    c2.append(document.createElement("hr"))
+    //c2.append(document.createElement("hr"))
   },
 
   showDelegate: function() {
+  var temp = document.getElementById("Delegate");
   var addresses = document.createElement("select");
   addresses.setAttribute("id", "selectedAddress");
   addresses.setAttribute("class", "form-control");
@@ -305,12 +308,14 @@ App = {
   container.empty();
   container = document.getElementById("addressMenu");
   container.appendChild(addresses);
+  var br = document.createElement("br");
   var newButton = document.createElement("a");
   newButton.className = "btn btn-primary";
   var t = document.createTextNode("Delegera")
   newButton.appendChild(t);
   newButton.type = "submit";
   newButton.addEventListener('click', function(event){App.delegateTo()});
+  container.appendChild(br);
   container.appendChild(newButton);
 },
 
@@ -402,7 +407,6 @@ function addFields() {
   while (container.hasChildNodes()) {
     container.removeChild(container.lastChild);
   }
-
   for (i=0;i<number;i++){
     // Append a node with a random text
     container.appendChild(document.createTextNode("Förslag " + (i+1)));
