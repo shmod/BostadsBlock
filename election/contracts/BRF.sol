@@ -183,6 +183,7 @@ contract BRF {
 	function delegateTo(uint ballotID, address to) public returns(bool success){
 		require(members[msg.sender].voted[ballotID] != true, "You have already used up your votes");
 		require(ballots[ballotID].delegate[to] == 0, "To delegatee has already been delegated to");
+		require(ballots[ballotID].delegate[msg.sender] == 0, "To delegator has already been delegated to");
 		require(to!=msg.sender);
 		
 		members[msg.sender].voted[ballotID] = true;

@@ -95,14 +95,14 @@ contract("BRF", function(accounts) {
   it("Testing the Delegate function", function() {
     return BRF.deployed().then(function(instance) {
       brfInstance = instance; 
-      brfInstance.createBallot("delegate", [11,22], 0, [], []);
+      brfInstance.createBallot("delegate", [11,22], 1, [web3.eth.accounts[2]], [40]);
       brfInstance.delegateTo(5, web3.eth.accounts[0], {from: web3.eth.accounts[1]});
       //console.log(brfInstance.)
       //attempting to vote after having delegated.
       return brfInstance.vote(5,0,{from : web3.eth.accounts[1]});
     }).then(assert.fail).catch(function(error) {
       assert(error.message.indexOf('revert') >= 0, "voting after delegating");
-      brfInstance.numBallots();
+      return brfInstance.numBallots();
     }).then(function(nOfBall){
       assert.equal(nOfBall,6, "numBallots");
       // delegating a second time
@@ -112,9 +112,19 @@ contract("BRF", function(accounts) {
       // delegating when being delegated to already
       return brfInstance.delegateTo(5,web3.eth.accounts[1], {from: web3.eth.accounts[0]});
     }).then(assert.fail).catch(function(error) {
-      console.log(error);
-      assert(error.message.indexOf('revert') >= 0, "second step delegating");
-      
+      //console.log(error);
+      assert(error.message.indexOf('revert') >= 0, "second step delegating dissalowed");
+      // vote after being delegated to
+      brfInstance.vote(5,1,{from:web3.eth.accounts[0]});
+      return brfInstance.getNumAddresses();
+    }).then(function(nOfAdd) {
+      assert.equal(nOfAdd,3, "Correct number of addresses given right to vote");
+      brfInstance.createBallot("test",[2,1],1,[web3.eth.accounts[3]],[1]);
+      brfInstance.delegateTo(6, web3.eth.accounts[1], {from: web3.eth.accounts[2]});
+      brfInstance.vote(6,1, {from:web3.eth.accounts[1]});
+      return brfInstance.getNumAddresses();
+    }).then(function(nOfAdd) {
+      assert.equal(nOfAdd,4, "A fourth address is given the right to vote.")
     });
   });
 
