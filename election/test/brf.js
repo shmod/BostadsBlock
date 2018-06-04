@@ -62,8 +62,6 @@ contract("BRF", function(accounts) {
   });
 
 
-
-
   it("Throws exception when voting on invalid ballot or proposals or when not allowed to vote", function() {
     return BRF.deployed().then(function(instance) {
       brfInstance = instance; 

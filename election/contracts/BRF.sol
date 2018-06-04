@@ -22,8 +22,6 @@ contract BRF {
     	uint value
     );
 
-
-
 	mapping (address => Member) private members;
 	address[] private addressesList;
 	uint[] private weights;
@@ -58,10 +56,9 @@ contract BRF {
 		address[] targetAddresses;
 		int flag;
 		uint[] targetValues;
+		uint sumVoteCount;
 		// add mapping of who has voted for what
 	}
-
-
 
     /* @dev Constructor for BRF. Sets the caller address to be the co-ops chairperson 
     * and other initial values.
@@ -79,7 +76,7 @@ contract BRF {
 	* can be made.
 	* Emits depositEvent
 	*/
-	function deposit() payable {
+	function deposit() public payable {
     	emit depositEvent(msg.sender, msg.value);
     }
 
@@ -89,7 +86,7 @@ contract BRF {
 	* @param newAdd Address that is to be given voting rights
 	* @returns success Returns if function is successful 
 	*/
-	function giveRightToVote(uint weight, address newAdd) public returns(bool success){
+	function giveRightToVote(uint weight, address newAdd) internal returns(bool success){
 		require (weight > 0, "Cannot assign nonpositive values to our weights. revert");
         require(members[newAdd].weight == 0, "The address already has voting rights.");
 		members[newAdd].weight = weight;
@@ -99,13 +96,6 @@ contract BRF {
 
 		return true;
 	}
-
-
-	/* Transfer the ownership of one apartment from one owner to another */
-	function transferOwnership(address newOwner) public {
-		
-	}
-
 
 	/* @dev Creates a new ballot and pushes it into the global array called ballots. When creating a ballot
 	* regarding the addition of a member, the _flag is set to 1. Then the proposal 1 indicates a yesvote. 
@@ -129,7 +119,7 @@ contract BRF {
 				require (getBalance() > _targetValues[i], "Not enough ether on the contract");
 			}
 		}
-		
+		ballots[numBallots].sumVoteCount = 0;
 		ballots[numBallots].name = _ballotName;
 		ballots[numBallots].ID = numBallots;
 		ballots[numBallots].flag = _flag;
@@ -157,19 +147,22 @@ contract BRF {
 	    require (ballots[ballotID].flag != 20, "Ballot is not live");
 	    
 	    ballots[ballotID].proposals[proposalID].voteCount += members[msg.sender].weight+ballots[ballotID].delegate[msg.sender];
+	    ballots[ballotID].sumVoteCount += members[msg.sender].weight+ballots[ballotID].delegate[msg.sender];
 	    members[msg.sender].voted[ballotID] = true;
 	    members[msg.sender].vote[ballotID] = proposalID;
 	    // If ballot is meant to give voting rights to a new member, check if the result is 
 	    // yes then call giveRightToVote() with the desired information;
-	    if (ballots[ballotID].flag == 1 && hasWinner(ballotID) && getWinner(ballotID)==1) {
+	    if (ballots[ballotID].flag == 1 && getWinner(ballotID)==1) {
 	    	ballots[ballotID].flag = 20;
 	    	return giveRightToVote(ballots[ballotID].targetValues[0], ballots[ballotID].targetAddresses[0]);
 	    } 
 	    // Else if ballot is meant to send transaction to a target address, send to the winning proposal
-	    else if (ballots[ballotID].flag == 2 && hasWinner(ballotID)) {
+	    else {
 	    	uint l = getWinner(ballotID);
-	    	ballots[ballotID].targetAddresses[l].transfer(ballots[ballotID].targetValues[l]);
-	    	ballots[ballotID].flag = 20;
+	    	if (ballots[ballotID].flag == 2 && l != 888 && l != 999) {
+		    	ballots[ballotID].targetAddresses[l].transfer(ballots[ballotID].targetValues[l]);
+		    	ballots[ballotID].flag = 20;
+		    }
 	    }
 	    return true;
 	}
@@ -181,6 +174,7 @@ contract BRF {
 	* @returns success Returns whether the function was successfuly executed.
 	*/
 	function delegateTo(uint ballotID, address to) public returns(bool success){
+		require(ballots[ballotID].ID == ballotID, "No such ballots exist");
 		require(members[msg.sender].voted[ballotID] != true, "You have already used up your votes");
 		require(ballots[ballotID].delegate[to] == 0, "To delegatee has already been delegated to");
 		require(ballots[ballotID].delegate[msg.sender] == 0, "To delegator has already been delegated to");
@@ -196,31 +190,45 @@ contract BRF {
 
 	/* @dev Calls the ballot to retrieve the winning proposal id.
 	* @param ballotID The id of the associated
-	* @returns winningProposal The id (or index) of the winning proposal. Returns 
-	* 999 if there is a draw.
+	* @returns winningProposal The id (or index) of the winning proposal if the ballot can be called. Returns 
+	* 999 if there is a draw or 888 if it's too close to call.
 	*/
 	function getWinner(uint ballotID) public view returns (uint winningProposal){
  		bool flag;
  		uint winningVoteCount = 0;
+ 		uint secondPlaceID = 0;
+ 		winningProposal = 99;
         for (uint p = 0; p < ballots[ballotID].numProposals; p++) {
             if (ballots[ballotID].proposals[p].voteCount > winningVoteCount) {
                 winningVoteCount = ballots[ballotID].proposals[p].voteCount;
+                secondPlaceID = winningProposal;
                 winningProposal = p;
                 flag = false;
             }
             else if (ballots[ballotID].proposals[p].voteCount == winningVoteCount){
             	flag = true;
+            	secondPlaceID = p;
+            }
+            else if (ballots[ballotID].proposals[p].voteCount > ballots[ballotID].proposals[secondPlaceID].voteCount){
+            	secondPlaceID = p;	
             }
         }
+
         if (flag == true){
         	winningProposal =  999; 
+        }
+        else if (winningVoteCount-ballots[ballotID].proposals[secondPlaceID].voteCount>(sumWeights - ballots[ballotID].sumVoteCount)){
+        	return winningProposal;
+        }
+        else {
+        	return 888;
         }
 	}
 
 	/* @dev Checks that a proposal has a majority vote.
 	* @param ballotID	ID of the ballot
 	* @returns res If we can call a winner
-	*/
+	*//*
 	function hasWinner(uint ballotID) internal view returns(bool res) {
 		res = false;
         for (uint p = 0; p < ballots[ballotID].numProposals; p++) {
@@ -229,7 +237,7 @@ contract BRF {
             }
         }
         // need to fix if many proposals!! 
-	}
+	}*/
 	
 	/* test help functions */
 
