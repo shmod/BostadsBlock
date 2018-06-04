@@ -128,15 +128,4 @@ contract("BRF", function(accounts) {
     });
   });
 
-
-  /*it("attempts to give right to vote from another address", function() {
-    return BRF.deployed().then(function(instance) {
-      brfInstance = instance;
-      return brfInstance.giveRightToVote(1, web3.eth.accounts[4], {from : web3.eth.accounts[1]});
-    }).then(assert.fail).catch(function(error) {
-      console.log(error);
-      assert(error.message.indexOf('revert') >= 0);
-    });
-  });*/
-
 });
