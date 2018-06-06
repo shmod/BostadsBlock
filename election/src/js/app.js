@@ -72,7 +72,7 @@ App = {
       if (err === null) {
         App.account = account;
         myAccount = account;
-        $("#accountAddress").html("Your Account: " + account);
+        $("#accountAddress").html("Din adress: " + account);
       }
     });
     var id;
