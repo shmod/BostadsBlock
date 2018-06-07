@@ -211,10 +211,11 @@ App = {
 
   giveRight: function() {
   var address = document.getElementById("addressName").value;
-  var weights = document.getElementById("numWeights").value;
+  var weight = document.getElementById("numWeights").value;
+  var title = "New member: " + address;
   App.contracts.BRF.deployed().then(function(instance) {
     // Ändra!!! 
-    return instance.giveRightToVote(weights, address)
+    return instance.createBallot(title,[0,1],1, [address],[weight])
   });
   },
 

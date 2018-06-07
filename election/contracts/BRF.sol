@@ -87,7 +87,7 @@ contract BRF {
 	* @returns success Returns if function is successful 
 	*/
 	function giveRightToVote(uint weight, address newAdd) internal returns(bool success){
-		require (weight > 0, "Cannot assign nonpositive values to our weights. revert");
+		require(weight > 0, "Cannot assign nonpositive values to our weights. revert");
         require(members[newAdd].weight == 0, "The address already has voting rights.");
 		members[newAdd].weight = weight;
 		sumWeights += weight;
