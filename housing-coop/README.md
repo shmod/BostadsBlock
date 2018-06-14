@@ -1,6 +1,6 @@
-
-# Election - DAPP Tutorial
-Build your first decentralized application, or Dapp, on the Ethereum Network with this tutorial!
+# Housing Coop contract
+This repository offers a package with a smart contract for housing coops along with the tools necessary to run your local blockchain and 
+deploy the contract on it. In this project we followed the following instructions from Dappuniversity (http://www.dappuniversity.com/).
 
 **Full Free Video Tutorial:**
 https://youtu.be/3681ZYbDSSk
