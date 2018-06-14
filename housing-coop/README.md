@@ -8,19 +8,19 @@ Follow the steps below to download, install, and run this project. This is a bri
 ## Step 0 
 Download this repository.
 ## Step 1 
-Start of by installing nodejs (\url{https://nodejs.org/en/})
+Start of by installing nodejs (https://nodejs.org/en/).
 ## Step 2 
-Install Truffle (\url{http://truffleframework.com/}) by typing \textit{npm install -g truffle} into your terminal
+Install Truffle (http://truffleframework.com/) by typing "npm install -g truffle" into your terminal.
 ## Step 3 
-Install Metamask as a Chrome extension (\url{https://metamask.io/})
+Install Metamask as a Chrome extension (https://metamask.io/).
 ## Step 4 
 Start up Ganache, you will now have a local blockchain running on your computer.
 ## Step 5 
-Open up the terminal and upen up the \text{election} directory and type in \textit{npm install}.
+Open up the terminal and upen up the housing-coop directory and type in "npm install".
 ## Step 6 
-Then type in \textit{truffle migrate --reset}
+Then type in "truffle migrate --reset".
 ## Step 7 
-Type \textit{npm run dev} into the terminal
+Type "npm run dev" into the terminal.
 ## Step 8 
 Open up Chrome and type localhost:3000 into the address field.
 
@@ -33,7 +33,7 @@ Go to Ganache and get the port you are running on by taking the digits after the
 ## Step 12 
 Press the Metamask icon, press the "main network" text and press "Custom RPC".
 ## Step 13 
-In the field titled "New RPC URL" write \url{HTTP://localhost:PORT} where PORT are the digits obtained earlier and press save.
+In the field titled "New RPC URL" write HTTP://localhost:PORT where PORT are the digits obtained earlier and press save.
 
 Now we just need to add the accounts on the local blockchain into Metamask.
 ## Step 14 
