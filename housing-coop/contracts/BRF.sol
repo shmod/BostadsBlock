@@ -1,20 +1,13 @@
 pragma solidity ^0.4.19;
 
-
 /**
  * Written April-May 2018
- * The BRF contract represents a housing co-op (Swedish Bostadsrättsförening (BRF)) and
+ * The BRF contract represents a housing co-op (Swedish Bostadsrattsförening (BRF)) and
  * intends to simulate the voting process of such a co-op with the adding of ballots, 
  * proposals and new members.
  * 
  */
 contract BRF {
-
-
-	// voted event
-    event votedEvent (
-        uint indexed _candidateId
-    );
 
     // deposit event
     event depositEvent (
@@ -43,7 +36,6 @@ contract BRF {
 		uint name;
 		uint ID;
 		uint voteCount;
-		//hash = "qe23rs!"
 	}
 
 	// Struct containing information of each Ballot
@@ -52,12 +44,11 @@ contract BRF {
 		string name;
 		uint numProposals;
 		mapping(uint => Proposal) proposals;
-		mapping(address => uint) delegate;		//Lets us check if an adress has been delegated to
+		mapping(address => uint) delegate; 
 		address[] targetAddresses;
 		int flag;
 		uint[] targetValues;
 		uint sumVoteCount;
-		// add mapping of who has voted for what
 	}
 
     /* @dev Constructor for BRF. Sets the caller address to be the co-ops chairperson 
@@ -93,7 +84,6 @@ contract BRF {
 		sumWeights += weight;
 		addressesList.push(newAdd);
 		weights.push(weight);
-
 		return true;
 	}
 
@@ -225,51 +215,28 @@ contract BRF {
         }
 	}
 
-	/* @dev Checks that a proposal has a majority vote.
-	* @param ballotID	ID of the ballot
-	* @returns res If we can call a winner
-	*//*
-	function hasWinner(uint ballotID) internal view returns(bool res) {
-		res = false;
-        for (uint p = 0; p < ballots[ballotID].numProposals; p++) {
-            if (ballots[ballotID].proposals[p].voteCount > sumWeights/2) {
-                res = true;
-            }
-        }
-        // need to fix if many proposals!! 
-	}*/
 	
-	/* test help functions */
-
-	/*
-	@ dev Returns the ID of the winning proposal as a string
-	@ param ballotID ID of the Ballot
-	@ returns @winningProposal Name of the winning proposal
-	*/
-	//function getWinnerString(uint ballotID) public view returns (string winningProposal){
-	//	winningProposal = getWinner(ballotID);
-	//}
+	/* test and help functions */
 
 	/* @dev Returns the number of addresses with voting rights
-	@returns numAdd_ Number of addresses
+	* @returns numAdd_ Number of addresses
 	*/
 	function getNumAddresses()  public view returns (uint numAdd_) {
 		numAdd_ = addressesList.length;
 	}
 
-
 	/* @dev Returns the name of the ballot at a certain index
-	@param _ballotIndex Index of the ballot
-	@returns name_ Name of ballot
+	* @param _ballotIndex Index of the ballot
+	* @returns name_ Name of ballot
 	*/
 	function getBallotName(uint _ballotID)  view public returns (string name_){
 		name_ = ballots[_ballotID].name;
 	}
 	
 	/* @dev Returns the address and weight of a member
-	@param _num Index (member number)
-    @returns address_ Address of the member
-    @returns weight_ Weight of the member
+	* @param _num Index (member number)
+    * @returns address_ Address of the member
+    * @returns weight_ Weight of the member
     */
 	function getAddressWeight(uint _num) view public returns (address address_, uint weight_){
 		address_ = addressesList[_num];
@@ -277,38 +244,54 @@ contract BRF {
 	}
 	
 	/* @dev Returns the number of proposals for a certain ballot  
-	@param _ballotId Id of the ballot
+	* @param _ballotId Id of the ballot
 	*/
 	function getNumProposals(uint _ballotID) view public returns(uint numProps_){
 		numProps_ = ballots[_ballotID].numProposals;
 	}
 
-	/* @dev returns a tuple of propsal and votes corresponding to a certain
-	proposal.
-	@param _ballotId Id of the ballot
-	@param _propId Id of the proposal
-	@returns name Name of the proposal
-	@returns votecount the number of votes on this proposal
+	/* @dev Function that returns name of propsal and voteCount corresponding to a certain
+	proposalID.
+	* @param _ballotId Id of the ballot
+	* @param _propId Id of the proposal
+	* @returns name Name of the proposal
+	* @returns votecount the number of votes on this proposal
 	*/
 	function getProposal(uint _ballotID, uint _propID) view public returns (uint name_,uint voteCount_){
 		name_ = ballots[_ballotID].proposals[_propID].name;
 		voteCount_ = ballots[_ballotID].proposals[_propID].voteCount;
 	}
 
-	function proposalExists(uint ballotID, uint proposalID) view public returns (bool x) {
-		x = (ballots[ballotID].proposals[proposalID].ID == proposalID);
+	/* @dev Checks whether a proposal with a specific ID exists in the given ballot
+	* @param _ballotId Id of the ballot
+	* @param _propId Id of the proposal
+	* @returns x Whether the proposal exists
+	*/
+	function proposalExists(uint _ballotID, uint _propID) view public returns (bool x) {
+		x = (ballots[_ballotID].proposals[_propID].ID == _propID);
 	}
 
-	function ballotExists(uint ballotID) view public returns (bool x) {
-		x = (ballots[ballotID].ID == ballotID);
+	/* @dev Checks whether a Ballot with a specific ID exists
+	* @param _ballotId Id of the ballot
+	* @returns x Whether the Ballot exists
+	*/
+	function ballotExists(uint _ballotID) view public returns (bool x) {
+		x = (ballots[_ballotID].ID == _ballotID);
 	}
 
-	function myDelegates(uint ballotID) view public returns (uint x) {
-		x = ballots[ballotID].delegate[msg.sender];
+	/* @dev Checks how many weights have been delegated to the sender 
+	* @param _ballotId Id of the ballot in question
+	* @returns delegateWeight The weights that have been delegated to the sender 
+	*/
+	function myDelegates(uint _ballotID) view public returns (uint delegateWeight) {
+		delegateWeight = ballots[_ballotID].delegate[msg.sender];
 	}
 
-	function getBalance() view public returns (uint x){
-		x = address(this).balance;
+	/* @dev Gets the balance of the BRF
+	* @returns balance The balance of the BRF
+	*/
+	function getBalance() view public returns (uint balance){
+		balance = address(this).balance;
 	}
 
 	/* @dev Returns the address  of a member at a certain index
